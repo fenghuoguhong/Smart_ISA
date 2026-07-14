@@ -1,0 +1,558 @@
+apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+
+apply plugin: 'com.huawei.agconnect'
+
+// 语言瘦身插件
+//apply plugin: 'com.huawei.android.dynamicfeature.plugin.dynlanglite'
+
+
+// 语言瘦身插件：定义相关属性参数
+//DynLangLiteExtension {
+//    //必填
+//    bundletoolVersion = "0.9.15"
+//    //要保持和应用的minSdkVersion一致
+//    minSdkVersionCode = rootProject.ext.minSdkVersion
+//    //如果需要不打包某种语言，需配置exclude列表，支持配置多个语言不打包
+//    exclude = []
+//
+//    brotliPress = "single-lang"
+//}
+
+android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+
+    defaultConfig {
+        applicationId "com.huawei.maps.app"
+        manifestPlaceholders = [sharedUserId: ""]
+        minSdkVersion rootProject.ext.minSdkVersion
+        versionCode = Integer.parseInt(project.findProperty('app_versionCode'))
+        versionName = project.findProperty('app_versionName')
+        buildConfigField("Integer", "VERSION_CODE", project.findProperty('app_versionCode'))
+        buildConfigField("String", "VERSION_NAME", "\"" + project.findProperty('app_versionName') + "\"")
+        if (isTheFlavor("Preinstallv7")) {
+            ndk {
+                abiFilters 'armeabi-v7a'
+            }
+            targetSdkVersion 29
+        } else if (isTheFlavor("Preinstallv8")) {
+            ndk {
+                abiFilters 'arm64-v8a'
+            }
+            targetSdkVersion 29
+        } else if (isTheFlavor("Common") || isTheFlavor("SmartHY")) {
+            println("---isTheFlavor Common ,smartHY use x86")
+
+            ndk {
+                abiFilters 'armeabi-v7a', 'arm64-v8a', "x86", "x86_64"
+            }
+            targetSdkVersion rootProject.ext.targetSdkVersion
+        } else {
+            ndk {
+                abiFilters 'armeabi-v7a', 'arm64-v8a'
+            }
+            targetSdkVersion rootProject.ext.targetSdkVersion
+        }
+
+        multiDexEnabled true
+        vectorDrawables.useSupportLibrary = true
+        testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles "consumer-rules.pro"
+    }
+    flavorDimensions "mode", "company"
+
+    signingConfigs {
+        config {
+            storeFile file(RELEASE_KEY_STORE_PATH)
+            keyAlias RELEASE_KEY_ALIAS
+            keyPassword RELEASE_KEY_PASSWORD
+            storePassword RELEASE_STORE_PASSWORD
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.config
+
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            packagingOptions {
+                jniLibs {
+                    useLegacyPackaging true
+                }
+                //CPU架构为 ARMv7 ARMv8
+                doNotStrip "*/arm64-v8a/libucs-credential.so"
+                doNotStrip "*/armeabi-v7a/libucs-credential.so"
+                //CPU架构为 x86
+                //doNotStrip "*/x86/libucs-credential.so"
+            }
+            multiDexKeepProguard file('multidex-config.pro')
+
+            def app_icon = "@drawable/appbg_ld"
+            def app_name = "@string/hwmap_ld"
+
+            // smart-hy 和 smart-hx使用定制icon和app_name
+            if (isTheFlavor("SmartHY") || isTheFlavor("Smart")) {
+                app_icon = "@drawable/appbg_smart"
+                app_name = "@string/hwmap_smart"
+            }
+            manifestPlaceholders = [
+                    app_icon: app_icon,
+                    app_name: app_name
+            ]
+        }
+        debug {
+            signingConfig signingConfigs.config
+
+            def app_icon = "@drawable/appbg_ld"
+            def app_name = "@string/hwmap_ld"
+
+
+            manifestPlaceholders = [
+                    app_icon: app_icon,
+                    app_name: app_name
+            ]
+
+            packagingOptions {
+                //CPU架构为 ARMv7 ARMv8
+                doNotStrip "*/arm64-v8a/libucs-credential.so"
+                doNotStrip "*/armeabi-v7a/libucs-credential.so"
+                //CPU架构为 x86
+                //doNotStrip "*/x86/libucs-credential.so"
+            }
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_11
+        targetCompatibility JavaVersion.VERSION_11
+    }
+
+    kotlinOptions {
+        jvmTarget = '11'
+    }
+
+    dataBinding {
+        enabled = true
+    }
+
+    dexOptions {
+        javaMaxHeapSize "4g"
+        preDexLibraries true
+        maxProcessCount 8
+    }
+
+    // 语言瘦身插件
+    aaptOptions {
+        additionalParameters "--stable-ids", "${project.rootProject.file('stable-ids.txt').absolutePath}"
+    }
+    bundle {
+        language {
+            enableSplit = true
+        }
+        density {
+            enableSplit = false
+        }
+        abi {
+            enableSplit = false
+        }
+    }
+    lintOptions {
+        checkReleaseBuilds false
+        abortOnError false
+    }
+
+    productFlavors {
+        autoproduct {
+            // 车机公版
+            applicationId "com.petal.leapmotor.map.isa"
+            dimension "mode"
+            missingDimensionStrategy "mode", "auto"
+        }
+        common {
+            // 车机公版
+            dimension "company"
+            missingDimensionStrategy "company", "common"
+        }
+
+        demo {
+            // demo车机版本
+            dimension "company"
+            missingDimensionStrategy "company", "demo"
+        }
+    }
+    sourceSets {
+
+        autoproduct.assets.srcDirs = ['src/main/assets/auto', 'flavors/autoproduct/assets']
+        autoproduct { java.srcDirs = ['src/auto/java', 'flavors/autoproduct/java'] }
+
+    }
+    applicationVariants.all { variant ->
+        variant.outputs.all { output ->
+            def build = buildType.name
+            def version = "${android.defaultConfig.versionName}"
+            def createTime = new Date().format("yyyy-MM-dd-kkmmss", TimeZone.getTimeZone("GMT+08:00"))
+
+            // if (build == "release") { // 只处理生产版本
+            // def dirName = "launch_${version}_${createTime}"
+            // def apkDir = rootProject.file("launch/apk")
+            // if (!apkDir.exists()) {
+            //     apkDir.mkdirs()
+            // }
+            // variant.packageApplicationProvider.get().outputDirectory = apkDir  // 指定apk的输出位置
+
+            def apkName = "KikaIsaEhp_${version}_${createTime}_${output.outputFileName}"
+            output.outputFileName = apkName  // 指定apk输出文件名
+            // }
+        }
+    }
+    // 启用 AIDL 支持
+    buildFeatures {
+        aidl true
+    }
+}
+
+configurations {
+    // copy agconnect-services.json文件到src
+    copy {
+        from(file("flavors")) {
+            include '**/agconnect-services.json'
+            exclude '**/assets'
+            exclude '**/java'
+        }
+        into('src')
+    }
+    implementation.exclude group: 'org.jetbrains', module: 'annotations'
+}
+
+configurations.all {
+    resolutionStrategy.force 'org.antlr:antlr4-runtime:4.7.1'
+    resolutionStrategy.force 'org.antlr:antlr4-tool:4.7.1'
+    resolutionStrategy {
+        cacheChangingModulesFor 0, 'seconds'
+        cacheDynamicVersionsFor 0, 'seconds'
+    }
+}
+
+// 编译完成后，删除拷贝过来的agconnect-services.json文件
+gradle.addBuildListener(new BuildListener() {
+
+    @Override
+    void beforeSettings(Settings settings) {
+        super.beforeSettings(settings)
+    }
+
+    @Override
+    void settingsEvaluated(Settings settings) {
+    }
+
+    @Override
+    void projectsLoaded(Gradle gradle) {
+    }
+
+    @Override
+    void projectsEvaluated(Gradle gradle) {
+
+    }
+
+    @Override
+    void buildFinished(BuildResult buildResult) {
+        println("---BuildListener--buildFinished")
+        deleteAgcAndPathIfEmpty('src/autoproduct')
+        killJavaProcess()
+    }
+
+    private void deleteAgcAndPathIfEmpty(String path) {
+        delete(path + "/agconnect-services.json")
+        if (file(path) == null || file(path).list() == null) {
+            return
+        }
+        if (file(path).list().length == 0) {
+            delete(path)
+        }
+    }
+
+    private void killJavaProcess() {
+        println("---BuildListener--killJavaProcess")
+        if (isWindows() && isInstall()) {
+            stopJava()
+        }
+    }
+
+    private boolean isWindows() {
+        return org.gradle.internal.os.OperatingSystem.current().isWindows()
+    }
+
+    private boolean isInstall() {
+        println(getGradle().getStartParameter().getTaskRequests().toString())
+        String buildString = getGradle().getStartParameter().getTaskRequests().toString().toLowerCase()
+        println("---BuildListener--isInstall" + buildString)
+        return buildString.contains("install") || buildString.contains("assemble")
+    }
+
+    private void stopJava() {
+        println("---stop java.exe")
+        String command = "taskkill /f /im java.exe"
+        Runtime.getRuntime().exec(command)
+    }
+})
+
+configurations.all {
+    resolutionStrategy {
+        cacheChangingModulesFor 0, 'seconds'
+        cacheDynamicVersionsFor 0, 'seconds'
+    }
+}
+
+dependencies {
+    api fileTree(dir: 'libs')
+    // 外网依赖
+    def nav_version = "2.3.2"
+    def aegis_verison = "1.2.0.309"
+    def networkKit_version = "7.0.6.300"
+
+    /*** HMS依赖部分 路径中待hms的如hmsbase，locationkit等 ***/
+    implementation "com.huawei.hms:network-common:${networkKit_version}"
+    implementation "com.huawei.hms:network-grs:6.0.11.300"
+    implementation "com.huawei.hms:filemanager:5.0.8.301"
+    implementation "com.huawei.hms:network-ai:${networkKit_version}"
+    implementation "com.huawei.hms:network-embedded:${networkKit_version}"
+
+    implementation "com.huawei.android.hms:security-base:1.2.1.302"
+    implementation "com.huawei.android.hms:security-ssl:${aegis_verison}"
+    implementation "com.huawei.android.hms:security-encrypt:${aegis_verison}"
+    implementation "com.huawei.android.hms:security-detect:${aegis_verison}"
+    implementation "com.huawei.android.hms:security-intent:1.2.0.310"
+
+    implementation "com.huawei.hmf:tasks:1.4.1.300"
+
+    /*** PLATFORM依赖部分 如agc等 ***/
+    implementation "com.huawei.agconnect:agconnect-remoteconfig:1.8.1.300"
+
+    //crash收集
+    implementation "com.huawei.agconnect:agconnect-crash-native:1.8.1.300"
+    implementation "com.huawei.agconnect:agconnect-crash:1.8.1.300"
+    // push kit
+    api 'com.huawei.hms:push:6.12.0.300'
+
+    /**
+     * 账号sdk
+     */
+    api "com.huawei.hms:hwid:6.4.0.301"
+
+    // 添加App Linking SDK
+    api 'com.huawei.agconnect:agconnect-applinking:1.8.1.300'
+
+    // 畅连分享
+    api 'com.huawei.caasengine:caasengine-message:1.0.0.300'
+
+    // 风控组件
+    api 'com.huawei.hms:safetydetect:6.7.0.302'
+
+    implementation 'androidx.appcompat:appcompat:1.3.0'
+
+    implementation "androidx.lifecycle:lifecycle-extensions:2.2.0"
+    implementation "androidx.recyclerview:recyclerview:1.2.1"
+    implementation "androidx.room:room-common:2.2.5"
+
+    implementation "androidx.navigation:navigation-fragment:${nav_version}"
+    implementation "androidx.navigation:navigation-ui:${nav_version}"
+    implementation 'androidx.constraintlayout:constraintlayout:2.1.1'
+
+    /*** 第三方开源软件依赖部分 ***/
+    implementation "com.google.android.material:material:1.3.0"
+
+    implementation "io.reactivex.rxjava3:rxjava:3.1.5"
+    implementation "io.reactivex.rxjava3:rxandroid:3.0.2"
+
+    implementation "com.github.bumptech.glide:glide:4.12.0"
+
+
+    implementation "com.huawei.hms:ucs-credential-developers:1.0.4.314"
+
+    // 打点上报SDK公网没有embed引入 数据库公网引入
+    implementation "org.greenrobot:greendao:3.3.0"
+
+    // room相关
+    //noinspection GradleDependency
+    api "androidx.room:room-runtime:${rootProject.ext.roomVersion}"
+    implementation "androidx.room:room-compiler:${rootProject.ext.roomVersion}"
+    //viewModelScope
+    api "androidx.lifecycle:lifecycle-viewmodel-ktx:$coroutines_viewmodel_version"
+    //协程
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:${rootProject.ext.coroutines_version}"
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:${rootProject.ext.coroutines_version}"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.0"
+    api('org.locationtech.jts:jts-core:1.18.2')
+
+    // Intelligent Color Picker & Palette
+    implementation 'androidx.palette:palette:1.0.0'
+    api 'com.github.AppDevNext:MPAndroidChart:3.1.0.10'
+
+    // 新增androix.webkit支持
+    api "androidx.webkit:webkit:1.4.0"
+
+    // 用于判断gms是否可用
+    implementation 'com.google.android.gms:play-services-base:17.2.1'
+
+    // okhttp
+    api 'com.squareup.okhttp3:okhttp:4.11.0'
+    api 'androidx.lifecycle:lifecycle-common-java8:2.4.0'
+    api 'org.apache.commons:commons-compress:1.21'
+    /*** HMS依赖部分 路径中待hms的如hmsbase，locationkit等 ***/
+    println("StartParameter = " + getGradle().getStartParameter().getTaskRequests().toString());
+
+    //手势动画配置
+    api('com.airbnb.android:lottie:3.7.0') {
+        exclude group: "com.squareup.okio", module: "okio"
+    }
+
+    api 'com.tencent.mm.opensdk:wechat-sdk-android-without-mta:6.8.0'
+
+//    implementation "net.zetetic:android-database-sqlcipher:4.5.2"
+
+
+    implementation "commons-fileupload:commons-fileupload:1.5"
+    // (Java only)
+    implementation 'androidx.work:work-runtime:2.7.1'
+
+    // https://mvnrepository.com/artifact/com.google.zxing/core
+    implementation 'com.google.zxing:core:3.4.1'
+
+    api 'com.google.android.flexbox:flexbox:3.0.0'
+    api "com.github.chrisbanes:PhotoView:2.3.0"
+
+    // aop
+    api 'org.aspectj:aspectjrt:1.9.7'
+
+    api 'com.airbnb.android:lottie:3.7.0'
+    implementation('androidx.media:media:1.0.0')
+
+    // Tts部分
+    implementation('com.huawei.hms:ml-computer-voice-tts:3.15.1.300') {
+        exclude group: "com.huawei.hmf", module: "tasks"
+    }
+    // 引入实时语音识别服务插件
+    implementation 'com.huawei.hms:ml-computer-voice-asr-plugin:3.13.1.302'
+    implementation('com.github.kizitonwose:CalendarView:1.0.4') {
+        exclude group: 'junit', module: 'junit'
+        exclude group: 'androidx.core', module: 'core'
+        exclude group: 'androidx.core', module: 'core-ktx'
+    }
+    implementation "org.apache.commons:commons-lang3:3.12.0"
+    // 2.14.1.302 外网没有embed进去 LocationLiteSdk:core
+    implementation "org.tukaani:xz:1.9"
+    implementation 'com.google.flatbuffers:flatbuffers-java:2.0.2'
+    implementation 'com.google.protobuf:protobuf-java:3.25.5'
+    implementation 'com.huawei.hms:update:4.0.4.301'
+
+    api "com.mikesamuel:json-sanitizer:1.2.2"
+    implementation "net.zetetic:sqlcipher-android:4.6.0"
+    implementation 'net.lingala.zip4j:zip4j:2.11.3'
+    annotationProcessor 'com.google.auto.service:auto-service:1.0.1'
+    implementation 'com.google.auto.service:auto-service-annotations:1.0.1'
+    implementation "com.alibaba:fastjson:2.0.54"
+}
+
+
+import org.aspectj.bridge.MessageHandler
+import org.aspectj.tools.ajc.Main
+
+import java.util.zip.ZipEntry
+import java.util.zip.ZipFile
+import java.util.zip.ZipOutputStream
+
+final def variants = project.android.applicationVariants
+variants.all { variant ->
+    JavaCompile javaCompile = variant.javaCompile
+    javaCompile.doLast {
+        String[] args = ["-showWeaveInfo",
+                         "-11",
+                         "-inpath", javaCompile.destinationDirectory.toString(),
+                         "-aspectpath", javaCompile.classpath.asPath,
+                         "-d", javaCompile.destinationDirectory.toString(),
+                         "-classpath", javaCompile.classpath.asPath,
+                         "-bootclasspath", project.android.bootClasspath.join(File.pathSeparator)]
+        MessageHandler handler = new MessageHandler(true);
+        new Main().run(args, handler);
+    }
+}
+// 主要对resource.arsc进行压缩并打包
+// 音频、视频文件压缩后会出现资源加载失败，不能压缩
+// res目录中不能压缩的文件类型在noCompressExt中声明，以STORED形式存储；其他类型的文件以DEFLATED格式压缩
+def compressRes(originApk, targetApk) {
+    def noCompressExt = [".jpg", ".jpeg", ".gif",
+                         ".wav", ".mp2", ".mp3", ".ogg", ".aac",
+                         ".mpg", ".mpeg", ".mid", ".midi", ".smf", ".jet",
+                         ".rtttl", ".imy", ".xmf", ".mp4", ".m4a",
+                         ".m4v", ".3gp", ".3gpp", ".3g2", ".3gpp2",
+                         ".amr", ".awb", ".wma", ".wmv", ".webm", ".mkv"]
+    println "compressRes"
+    ZipFile zipFile = new ZipFile(originApk)
+    ZipOutputStream zos = new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(targetApk)))
+    zipFile.entries().each { entryIn ->
+        if (entryIn.directory) {
+            println "${entryIn.name} is a directory"
+        } else {
+            def entryOut = new ZipEntry(entryIn.name)
+            def dotPos = entryIn.name.lastIndexOf('.')
+            def ext = (dotPos >= 0) ? entryIn.name.substring(dotPos) : ""
+            def isRes = entryIn.name.startsWith('res/')
+            if (isRes && ext in noCompressExt) {
+                entryOut.method = ZipEntry.STORED
+                entryOut.size = entryIn.size
+                entryOut.compressedSize = entryIn.size
+                entryOut.crc = entryIn.crc
+            } else {
+                entryOut.method = ZipEntry.DEFLATED
+            }
+            zos.putNextEntry(entryOut)
+            zos << zipFile.getInputStream(entryIn)
+            zos.closeEntry()
+        }
+    }
+    zos.finish()
+    zos.close()
+    zipFile.close()
+}
+// 对不同环境的release包进行压缩
+task compressRelease {
+    ext.needCompress = ['preinstallv7': 'true', 'preinstallv8': 'true']
+    doLast {
+        ext.needCompress.eachWithIndex { Map.Entry<String, String> entry, int i ->
+            def flavor = entry.key
+            def oldApkFile = file("$rootDir/app/build/outputs/apk/$flavor/release/app-$flavor-release-base-master.apk")
+            if (oldApkFile.exists() && "true".equals(entry.value)) {
+                def newApkFile = new File("$rootDir/app/build/outputs/apk/$flavor/release/app-$flavor-release-compressed.apk")
+                // 压缩
+                compressRes(oldApkFile.absolutePath, newApkFile.absolutePath)
+                // 删除原文件，修改文件名
+                oldApkFile.delete()
+                newApkFile.renameTo(file("$rootDir/app/build/outputs/apk/$flavor/release/app-$flavor-release-base-master.apk"))
+                // 确保每个环境的包只执行一次压缩
+                ext.needCompress.put(entry.key, "false")
+            }
+        }
+    }
+}
+// 在编译任务执行后增加压缩包任务，同时支持流水线和本地打包
+project.tasks.whenTaskAdded { Task task ->
+    if (task.name.startsWith("DynLangLite") && task.name.endsWith("Release")) {
+        // 添加压缩任务
+        task.finalizedBy(compressRelease)
+    }
+    if (task.name.startsWith("DynLangLitehwsign")) {
+        // 确保压缩任务在签名前执行
+        task.dependsOn(compressRelease)
+    }
+    // if (task.name.contains("ReleaseApkListingFileRedirect")) { // 过滤release
+    //     task.enabled = false
+    // }
+}
+
+private boolean isTheFlavor(String flavor) {
+    getGradle().getStartParameter().getTaskRequests().toString().contains(flavor)
+}

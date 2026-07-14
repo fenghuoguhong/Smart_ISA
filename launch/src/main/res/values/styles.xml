@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Custom style for a transparent window without display -->
+    <style name="Theme.NoDisplay" parent="@android:style/Theme.Translucent.NoTitleBar">
+        <!-- Set the background to null to make the window transparent -->
+        <item name="android:windowBackground">@null</item>
+        <!-- Set the content overlay to null -->
+        <item name="android:windowContentOverlay">@null</item>
+        <!-- Set the window to be translucent -->
+        <item name="android:windowIsTranslucent">true</item>
+        <!-- Set the animation style to null -->
+        <item name="android:windowAnimationStyle">@null</item>
+        <!-- Disable the window preview -->
+        <item name="android:windowDisablePreview">true</item>
+        <!-- Set the window to not display -->
+        <item name="android:windowNoDisplay">true</item>
+    </style>
+</resources>

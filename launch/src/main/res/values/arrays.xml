@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="fixed_filters">
+        <item>无过滤</item>
+        <item>POSITION</item>
+        <item>STUB</item>
+        <item>STATUS</item>
+        <item>PROFILE_LONG</item>
+        <item>PROFILE_SHORT</item>
+        <item>META_DATA</item>
+        <item>SEGMENT</item>
+    </string-array>
+</resources>

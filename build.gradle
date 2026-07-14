@@ -1,0 +1,160 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    ext.kotlin_version = '1.6.10'
+
+    def taskRequest = getGradle().getStartParameter().getTaskRequests().toString()
+    def isAuto = taskRequest.containsIgnoreCase('auto')
+    def isMirror = taskRequest.containsIgnoreCase('mirror')
+
+    /** 保留task参数，用于其他业务的判断 */
+    ext.taskRequest = taskRequest
+
+    /** 是否是车机 */
+    ext.isAuto = isAuto
+
+    /** 是否是mirror环境 */
+    ext.isMirror = isMirror
+
+    /** 是否启用编译加速插件 */
+    ext.isStartQuicklyCompilationPlugin = false
+
+    // 车机SDK最低26，手机是24
+    if (isAuto) {
+        ext.minSdkVersion = 29
+    } else {
+        ext.minSdkVersion = 29
+    }
+
+
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
+//        maven {
+//            url 'https://cmc.centralrepo.rnd.huawei.com/maven/'
+//        }
+//        maven { url 'https://artifactory.cde.huawei.com/artifactory/maven-public' }
+//        // for APM
+        maven { url 'https://developer.huawei.com/repo/' }
+//        maven { url 'https://dgg.maven.repo.cmc.tools.huawei.com/artifactory/sz-maven-public' }
+//        maven {url 'https://cmc.centralrepo.rnd.huawei.com/artifactory/product_maven/' }
+//        maven {
+//            url "$rootDir/localMaven"
+//        }
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:7.4.2'
+//        classpath project.property('basic.framework.groupId') + ":navigationMerge:1.0.0.8-SNAPSHOT"
+        // 签名工具
+        classpath 'com.huawei.agconnect:agcp:1.6.0.300'
+
+//        classpath('com.huawei.cloudservice.appgallery.tools:HwApkSigner:22.5.22.100')
+
+//        classpath 'com.huawei.hms:dynlanglitplugin:1.0.20.304'
+
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+
+        classpath 'org.aspectj:aspectjtools:1.9.7'
+
+        classpath 'org.aspectj:aspectjweaver:1.9.7'
+
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.1'
+    }
+}
+
+allprojects {
+    repositories {
+        maven { url 'https://maven.aliyun.com/repository/google' }
+        maven { url 'https://maven.aliyun.com/repository/central' }
+        maven { url "https://jitpack.io" }
+//        maven {
+//            url 'https://cmc.centralrepo.rnd.huawei.com/maven/'
+//        }
+//        maven {url 'https://dgg.maven.repo.cmc.tools.huawei.com/artifactory/sz-maven-public' }
+//        maven {url 'https://cmc.centralrepo.rnd.huawei.com/artifactory/product_maven/' }
+        maven { url 'https://developer.huawei.com/repo/' }
+//        maven { url 'https://artifactory.cde.huawei.com/artifactory/maven-public' }
+//        maven {
+//            url "$rootDir/localMaven"
+//        }
+    }
+
+    configurations.all {
+        resolutionStrategy {
+            force 'org.antlr:antlr4-runtime:4.7.1'
+            force 'org.antlr:antlr4-tool:4.7.1'
+            force 'androidx.lifecycle:lifecycle-runtime-ktx:2.5.1'
+            force 'androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1'
+            force 'androidx.lifecycle:lifecycle-servive:2.5.1'
+            force 'androidx.lifecycle:lifecycle-livedata-core-ktx:2.5.1'
+            force 'androidx.lifecycle:lifecycle-runtime:2.5.1'
+            force 'androidx.lifecycle:lifecycle-common:2.5.1'
+            force 'androidx.lifecycle:lifecycle-livedata:2.5.1'
+            force 'androidx.lifecycle:lifecycle-viewmodel:2.5.1'
+            force 'androidx.lifecycle:lifecycle-livedata-core:2.5.1'
+            force 'androidx.lifecycle:lifecycle-viewmodel-savedstate:2.5.1'
+            force 'com.huawei.hms:filemanager:7.0.3.300'
+            force 'com.huawei.agconnect:agconnect-remoteconfig:1.9.1.301'
+            force 'com.huawei.agconnect:agconnect-applinking:1.9.1.301'
+            force 'com.huawei.agconnect:agconnect-crash-native:1.9.1.301'
+            force 'com.huawei.agconnect:agconnect-crash:1.9.1.301'
+            force 'com.huawei.hms:ml-computer-voice-asr-plugin:3.13.1.302'
+            force 'com.huawei.hms:ml-computer-translate:3.9.0.300'
+            force 'com.huawei.hms:ml-computer-voice-realtimetranscription:3.9.0.300'
+            force 'commons-fileupload:commons-fileupload:1.5'
+            force 'com.google.code.gson:gson:2.9.1'
+            force 'commons-io:commons-io:2.11.0'
+            force 'com.huawei.hms:network-restclient-gsonconverter:7.0.1.300'
+            force 'org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.7.0'
+            force 'com.squareup.okhttp3:okhttp:4.11.0'
+            force 'com.huawei.android.hms:security-base:1.2.1.302'
+            force 'com.huawei.android.hms:security-encrypt:1.2.0.309'
+            force 'androidx.fragment:fragment:1.3.6'
+        }
+
+        exclude group: 'com.google.guava', module: 'failureaccess'
+        exclude group: 'androidx.lifecycle', module: 'lifecycle-extensions'
+    }
+}
+
+def libGroupId = 'com.huawei.maps.app'
+def basicFrameworkGroupId = project.property('basic.framework.groupId')
+def basicFrameworkVersion = '1.0.0.3'
+
+ext {
+    targetSdkVersion = 31
+    compileSdkVersion = 31
+    buildToolsVersion = "31.0.0"
+
+    emuiVersion = "1.1.1.317"
+    roomVersion = '2.4.2'
+
+    coroutines_version = '1.6.4'
+    coroutines_viewmodel_version = '2.4.0'
+    // com.huawei.hms:identity:用户身份服务
+    IDENTITY_SDK_VERSION = '6.4.0.301'
+
+    // 离线检索
+    OfflineSearch = "3.0.10.303"
+
+    // AR
+    MapArSDK = "6.5.0.300"
+
+    AutoSDK = "1.0.0.4-test75"
+
+    // 语言相关的包版本
+    voice_kit_version = "11.2.5.309"
+
+    // BasicFramework
+    MapBasicFramework = basicFrameworkVersion
+
+    // 模块发布到本地仓AAR的groupId
+    groupId = libGroupId
+
+    // 后续把所有依赖都配置在这里，各模块直接引入即可，或者通过flavor动态引入
+    dep_basic = "$basicFrameworkGroupId:BasicFramework:$basicFrameworkVersion"
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
