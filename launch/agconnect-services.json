@@ -1,253 +1,491 @@
 {
-	"agcgw":{
-		"backurl":"connect-drcn.hispace.hicloud.com",
-		"url":"connect-drcn.dbankcloud.cn",
-		"websocketbackurl":"connect-ws-drcn.hispace.dbankcloud.com",
-		"websocketurl":"connect-ws-drcn.hispace.dbankcloud.cn"
-	},
-	"agcgw_all":{
-		"CN":"connect-drcn.dbankcloud.cn",
-		"CN_back":"connect-drcn.hispace.hicloud.com",
-		"DE":"connect-dre.dbankcloud.cn",
-		"DE_back":"connect-dre.hispace.hicloud.com",
-		"RU":"connect-drru.hispace.dbankcloud.ru",
-		"RU_back":"connect-drru.hispace.dbankcloud.cn",
-		"SG":"connect-dra.dbankcloud.cn",
-		"SG_back":"connect-dra.hispace.hicloud.com"
-	},
-	"websocketgw_all":{
-		"CN":"connect-ws-drcn.hispace.dbankcloud.cn",
-		"CN_back":"connect-ws-drcn.hispace.dbankcloud.com",
-		"DE":"connect-ws-dre.hispace.dbankcloud.cn",
-		"DE_back":"connect-ws-dre.hispace.dbankcloud.com",
-		"RU":"connect-ws-drru.hispace.dbankcloud.ru",
-		"RU_back":"connect-ws-drru.hispace.dbankcloud.cn",
-		"SG":"connect-ws-dra.hispace.dbankcloud.cn",
-		"SG_back":"connect-ws-dra.hispace.dbankcloud.com"
-	},
-	"client":{
-		"cp_id":"260086000000068459",
-		"product_id":"737518067793986778",
-		"client_id":"780910018244379840",
-		"client_secret":"E29E592E448D600AE7FF10C76C4B5530A67774D8B1093EE5BDF4FBA0B94C9834",
-		"project_id":"737518067793986778",
-		"app_id":"112289513",
-		"api_key":"CwEAAAAAoSs5SFlpHUjCQ2LBdgzvFlEdYuy/wEQ/vPRItX8ytcUT6f42cLpYGPvCxeDqKpAp/9Q2ILQs3wSxRW2e7JkG3qPh7dQ=",
-		"package_name":"com.petal.leapmotor.map.isa"
-	},
-	"oauth_client":{
-		"client_id":"112289513",
-		"client_type":27
-	},
-	"app_info":{
-		"app_id":"112289513",
-		"package_name":"com.petal.leapmotor.map.isa"
-	},
-	"service":{
-		"analytics":{
-			"collector_url":"datacollector-drcn.dt.hicloud.com,datacollector-drcn.dt.dbankcloud.cn",
-			"collector_url_ru":"datacollector-drru.dt.dbankcloud.ru,datacollector-drru.dt.hicloud.com",
-			"collector_url_sg":"datacollector-dra.dt.hicloud.com,datacollector-dra.dt.dbankcloud.cn",
-			"collector_url_de":"datacollector-dre.dt.hicloud.com,datacollector-dre.dt.dbankcloud.cn",
-			"collector_url_cn":"datacollector-drcn.dt.hicloud.com,datacollector-drcn.dt.dbankcloud.cn",
-			"resource_id":"p1",
-			"channel_id":""
-		},
-		"edukit":{
-			"edu_url":"edukit.cloud.huawei.com.cn",
-			"dh_url":"edukit.cloud.huawei.com.cn"
-		},
-		"search":{
-			"url":"https://search-drcn.cloud.huawei.com"
-		},
-		"cloudstorage":{
-			"storage_url_sg_back":"https://agc-storage-dra.cloud.huawei.asia",
-			"storage_url_ru_back":"https://agc-storage-drru.cloud.huawei.ru",
-			"storage_url_ru":"https://agc-storage-drru.cloud.huawei.ru",
-			"storage_url_de_back":"https://agc-storage-dre.cloud.huawei.eu",
-			"storage_url_de":"https://ops-dre.agcstorage.link",
-			"storage_url":"https://agc-storage-drcn.platform.dbankcloud.cn",
-			"storage_url_sg":"https://ops-dra.agcstorage.link",
-			"storage_url_cn_back":"https://agc-storage-drcn.cloud.huawei.com.cn",
-			"storage_url_cn":"https://agc-storage-drcn.platform.dbankcloud.cn"
-		},
-		"ml":{
-			"mlservice_url":"ml-api-drcn.ai.dbankcloud.com,ml-api-drcn.ai.dbankcloud.cn"
-		}
-	},
-	"region":"CN",
-	"configuration_version":"3.0",
-	"processing_location_policy":{
-		"mlkit":"1"
-	},
-	"appInfos":[
-		{
-			"package_name":"com.changanpetalmaps.map",
-			"client":{
-				"app_id":"112539917"
-			},
-			"app_info":{
-				"package_name":"com.changanpetalmaps.map",
-				"app_id":"112539917"
-			},
-			"oauth_client":{
-				"client_type":27,
-				"client_id":"112539917"
-			}
-		},
-		{
-			"package_name":"com.huawei.poc.map",
-			"client":{
-				"app_id":"112462731"
-			},
-			"app_info":{
-				"package_name":"com.huawei.poc.map",
-				"app_id":"112462731"
-			},
-			"oauth_client":{
-				"client_type":27,
-				"client_id":"112462731"
-			}
-		},
-		{
-			"package_name":"com.petal.leapmotor.map.isa",
-			"client":{
-				"app_id":"112289513"
-			},
-			"app_info":{
-				"package_name":"com.petal.leapmotor.map.isa",
-				"app_id":"112289513"
-			},
-			"oauth_client":{
-				"client_type":27,
-				"client_id":"112289513"
-			}
-		},
-		{
-			"package_name":"com.petal.leapmotor.map",
-			"client":{
-				"app_id":"112289505"
-			},
-			"app_info":{
-				"package_name":"com.petal.leapmotor.map",
-				"app_id":"112289505"
-			},
-			"oauth_client":{
-				"client_type":27,
-				"client_id":"112289505"
-			}
-		},
-		{
-			"package_name":"com.gwm.petal.map",
-			"client":{
-				"app_id":"112011541"
-			},
-			"app_info":{
-				"package_name":"com.gwm.petal.map",
-				"app_id":"112011541"
-			},
-			"oauth_client":{
-				"client_type":27,
-				"client_id":"112011541"
-			}
-		},
-		{
-			"package_name":"com.smart.car.map",
-			"client":{
-				"app_id":"111916645"
-			},
-			"app_info":{
-				"package_name":"com.smart.car.map",
-				"app_id":"111916645"
-			},
-			"oauth_client":{
-				"client_type":27,
-				"client_id":"111916645"
-			}
-		},
-		{
-			"package_name":"com.radar.map",
-			"client":{
-				"app_id":"111916585"
-			},
-			"app_info":{
-				"package_name":"com.radar.map",
-				"app_id":"111916585"
-			},
-			"oauth_client":{
-				"client_type":27,
-				"client_id":"111916585"
-			}
-		},
-		{
-			"package_name":"com.leapmotor.map",
-			"client":{
-				"app_id":"111916557"
-			},
-			"app_info":{
-				"package_name":"com.leapmotor.map",
-				"app_id":"111916557"
-			},
-			"oauth_client":{
-				"client_type":27,
-				"client_id":"111916557"
-			}
-		},
-		{
-			"package_name":"com.gwm.map",
-			"client":{
-				"app_id":"111916527"
-			},
-			"app_info":{
-				"package_name":"com.gwm.map",
-				"app_id":"111916527"
-			},
-			"oauth_client":{
-				"client_type":27,
-				"client_id":"111916527"
-			}
-		},
-		{
-			"package_name":"com.huawei.maps.auto.aries",
-			"client":{
-				"app_id":"111578205"
-			},
-			"app_info":{
-				"package_name":"com.huawei.maps.auto.aries",
-				"app_id":"111578205"
-			},
-			"oauth_client":{
-				"client_type":27,
-				"client_id":"111578205"
-			}
-		},
-		{
-			"package_name":"com.avatr.ivi.map",
-			"client":{
-				"app_id":"111105501"
-			},
-			"app_info":{
-				"package_name":"com.avatr.ivi.map",
-				"app_id":"111105501"
-			},
-			"oauth_client":{
-				"client_type":27,
-				"client_id":"111105501"
-			}
-		},
-		{
-			"package_name":"com.huawei.maps.auto.app",
-			"client":{
-				"app_id":"105812875"
-			},
-			"app_info":{
-				"package_name":"com.huawei.maps.auto.app",
-				"app_id":"105812875"
-			},
-			"oauth_client":{
-				"client_type":27,
-				"client_id":"105812875"
-			}
-		}
-	]
+  "agcgw": {
+    "url": "connect-drcn.dbankcloud.cn",
+    "backurl": "connect-drcn.hispace.hicloud.com",
+    "websocketurl": "connect-ws-drcn.hispace.dbankcloud.cn",
+    "websocketbackurl": "connect-ws-drcn.hispace.dbankcloud.com"
+  },
+  "agcgw_all": {
+    "SG": "connect-dra.dbankcloud.cn",
+    "SG_back": "connect-dra.hispace.hicloud.com",
+    "CN": "connect-drcn.dbankcloud.cn",
+    "CN_back": "connect-drcn.hispace.hicloud.com",
+    "RU": "connect-drru.hispace.dbankcloud.ru",
+    "RU_back": "connect-drru.hispace.dbankcloud.cn",
+    "DE": "connect-dre.dbankcloud.cn",
+    "DE_back": "connect-dre.hispace.hicloud.com"
+  },
+  "websocketgw_all": {
+    "SG": "connect-ws-dra.hispace.dbankcloud.cn",
+    "SG_back": "connect-ws-dra.hispace.dbankcloud.com",
+    "CN": "connect-ws-drcn.hispace.dbankcloud.cn",
+    "CN_back": "connect-ws-drcn.hispace.dbankcloud.com",
+    "RU": "connect-ws-drru.hispace.dbankcloud.ru",
+    "RU_back": "connect-ws-drru.hispace.dbankcloud.cn",
+    "DE": "connect-ws-dre.hispace.dbankcloud.cn",
+    "DE_back": "connect-ws-dre.hispace.dbankcloud.com"
+  },
+  "client": {
+    "cp_id": "260086000000068459",
+    "product_id": "737518067793986778",
+    "client_id": "780910018244379840",
+    "client_secret": "E29E592E448D600AE7FF10C76C4B5530A67774D8B1093EE5BDF4FBA0B94C9834",
+    "project_id": "737518067793986778",
+    "app_id": "118193805",
+    "api_key": "CwEAAAAAoSs5SFlpHUjCQ2LBdgzvFlEdYuy/wEQ/vPRItX8ytcUT6f42cLpYGPvCxeDqKpAp/9Q2ILQs3wSxRW2e7JkG3qPh7dQ=",
+    "package_name": "com.smart.car.map.ehp"
+  },
+  "oauth_client": {
+    "client_id": "118193805",
+    "client_type": 27
+  },
+  "app_info": {
+    "app_id": "118193805",
+    "package_name": "com.smart.car.map.ehp"
+  },
+  "service": {
+    "analytics": {
+      "collector_url": "datacollector-drcn.dt.hicloud.com,datacollector-drcn.dt.dbankcloud.cn",
+      "collector_url_cn": "datacollector-drcn.dt.hicloud.com,datacollector-drcn.dt.dbankcloud.cn",
+      "collector_url_de": "datacollector-dre.dt.hicloud.com,datacollector-dre.dt.dbankcloud.cn",
+      "collector_url_ru": "datacollector-drru.dt.dbankcloud.ru,datacollector-drru.dt.hicloud.com",
+      "collector_url_sg": "datacollector-dra.dt.hicloud.com,datacollector-dra.dt.dbankcloud.cn",
+      "resource_id": "p1",
+      "channel_id": ""
+    },
+    "ml": {
+      "mlservice_url": "ml-api-drcn.ai.dbankcloud.com,ml-api-drcn.ai.dbankcloud.cn"
+    },
+    "cloudstorage": {
+      "storage_url": "https://agc-storage-drcn.platform.dbankcloud.cn",
+      "storage_url_ru": "https://agc-storage-drru.cloud.huawei.ru",
+      "storage_url_sg": "https://ops-dra.agcstorage.link",
+      "storage_url_de": "https://ops-dre.agcstorage.link",
+      "storage_url_cn": "https://agc-storage-drcn.platform.dbankcloud.cn",
+      "storage_url_ru_back": "https://agc-storage-drru.cloud.huawei.ru",
+      "storage_url_sg_back": "https://agc-storage-dra.cloud.huawei.asia",
+      "storage_url_de_back": "https://agc-storage-dre.cloud.huawei.eu",
+      "storage_url_cn_back": "https://agc-storage-drcn.cloud.huawei.com.cn"
+    },
+    "search": {
+      "url": "https://search-drcn.cloud.huawei.com"
+    },
+    "edukit": {
+      "edu_url": "edukit.cloud.huawei.com.cn",
+      "dh_url": "edukit.cloud.huawei.com.cn"
+    }
+  },
+  "region": "CN",
+  "configuration_version": "3.0",
+  "processing_location_policy": {
+    "mlkit": "1"
+  },
+  "appInfos": [
+    {
+      "package_name": "com.smart.car.map.ehp",
+      "client": {
+        "app_id": "118193805"
+      },
+      "oauth_client": {
+        "client_id": "118193805",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "118193805",
+        "package_name": "com.smart.car.map.ehp"
+      }
+    },
+    {
+      "package_name": "com.seresautomap.app",
+      "client": {
+        "app_id": "116836581"
+      },
+      "oauth_client": {
+        "client_id": "116836581",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "116836581",
+        "package_name": "com.seresautomap.app"
+      }
+    },
+    {
+      "package_name": "com.geelyautoehp.app",
+      "client": {
+        "app_id": "116766887"
+      },
+      "oauth_client": {
+        "client_id": "116766887",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "116766887",
+        "package_name": "com.geelyautoehp.app"
+      }
+    },
+    {
+      "package_name": "com.avatr.ivi.maps",
+      "client": {
+        "app_id": "116651509"
+      },
+      "oauth_client": {
+        "client_id": "116651509",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "116651509",
+        "package_name": "com.avatr.ivi.maps"
+      }
+    },
+    {
+      "package_name": "com.geelyautodr.app",
+      "client": {
+        "app_id": "116449481"
+      },
+      "oauth_client": {
+        "client_id": "116449481",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "116449481",
+        "package_name": "com.geelyautodr.app"
+      }
+    },
+    {
+      "package_name": "com.baic.abl.map",
+      "client": {
+        "app_id": "116009435"
+      },
+      "oauth_client": {
+        "client_id": "116009435",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "116009435",
+        "package_name": "com.baic.abl.map"
+      }
+    },
+    {
+      "package_name": "com.auto.chery.map.aloneisa",
+      "client": {
+        "app_id": "115578187"
+      },
+      "oauth_client": {
+        "client_id": "115578187",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "115578187",
+        "package_name": "com.auto.chery.map.aloneisa"
+      }
+    },
+    {
+      "package_name": "com.gwm.ptl.map",
+      "client": {
+        "app_id": "115396333"
+      },
+      "oauth_client": {
+        "client_id": "115396333",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "115396333",
+        "package_name": "com.gwm.ptl.map"
+      }
+    },
+    {
+      "package_name": "com.gwm.ptl.dr",
+      "client": {
+        "app_id": "115336099"
+      },
+      "oauth_client": {
+        "client_id": "115336099",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "115336099",
+        "package_name": "com.gwm.ptl.dr"
+      }
+    },
+    {
+      "package_name": "com.smart.car.map.ins",
+      "client": {
+        "app_id": "114728781"
+      },
+      "oauth_client": {
+        "client_id": "114728781",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "114728781",
+        "package_name": "com.smart.car.map.ins"
+      }
+    },
+    {
+      "package_name": "com.geelyautomap.app",
+      "client": {
+        "app_id": "114445595"
+      },
+      "oauth_client": {
+        "client_id": "114445595",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "114445595",
+        "package_name": "com.geelyautomap.app"
+      }
+    },
+    {
+      "package_name": "com.gwm.semidrive.maps.auto.app",
+      "client": {
+        "app_id": "114379287"
+      },
+      "oauth_client": {
+        "client_id": "114379287",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "114379287",
+        "package_name": "com.gwm.semidrive.maps.auto.app"
+      }
+    },
+    {
+      "package_name": "com.auto.chery.map.isa",
+      "client": {
+        "app_id": "113961719"
+      },
+      "oauth_client": {
+        "client_id": "113961719",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "113961719",
+        "package_name": "com.auto.chery.map.isa"
+      }
+    },
+    {
+      "package_name": "com.auto.chery.map",
+      "client": {
+        "app_id": "113961681"
+      },
+      "oauth_client": {
+        "client_id": "113961681",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "113961681",
+        "package_name": "com.auto.chery.map"
+      }
+    },
+    {
+      "package_name": "com.gwm.petal.dr",
+      "client": {
+        "app_id": "113844109"
+      },
+      "oauth_client": {
+        "client_id": "113844109",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "113844109",
+        "package_name": "com.gwm.petal.dr"
+      }
+    },
+    {
+      "package_name": "com.saic.car.petal.map",
+      "client": {
+        "app_id": "113745067"
+      },
+      "oauth_client": {
+        "client_id": "113745067",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "113745067",
+        "package_name": "com.saic.car.petal.map"
+      }
+    },
+    {
+      "package_name": "com.qiruiicar03petalmaps.map",
+      "client": {
+        "app_id": "113225281"
+      },
+      "oauth_client": {
+        "client_id": "113225281",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "113225281",
+        "package_name": "com.qiruiicar03petalmaps.map"
+      }
+    },
+    {
+      "package_name": "com.changanpetalmaps.map",
+      "client": {
+        "app_id": "112539917"
+      },
+      "oauth_client": {
+        "client_id": "112539917",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "112539917",
+        "package_name": "com.changanpetalmaps.map"
+      }
+    },
+    {
+      "package_name": "com.huawei.poc.map",
+      "client": {
+        "app_id": "112462731"
+      },
+      "oauth_client": {
+        "client_id": "112462731",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "112462731",
+        "package_name": "com.huawei.poc.map"
+      }
+    },
+    {
+      "package_name": "com.petal.leapmotor.map.isa",
+      "client": {
+        "app_id": "112289513"
+      },
+      "oauth_client": {
+        "client_id": "112289513",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "112289513",
+        "package_name": "com.petal.leapmotor.map.isa"
+      }
+    },
+    {
+      "package_name": "com.petal.leapmotor.map",
+      "client": {
+        "app_id": "112289505"
+      },
+      "oauth_client": {
+        "client_id": "112289505",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "112289505",
+        "package_name": "com.petal.leapmotor.map"
+      }
+    },
+    {
+      "package_name": "com.gwm.petal.map",
+      "client": {
+        "app_id": "112011541"
+      },
+      "oauth_client": {
+        "client_id": "112011541",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "112011541",
+        "package_name": "com.gwm.petal.map"
+      }
+    },
+    {
+      "package_name": "com.smart.car.map",
+      "client": {
+        "app_id": "111916645"
+      },
+      "oauth_client": {
+        "client_id": "111916645",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "111916645",
+        "package_name": "com.smart.car.map"
+      }
+    },
+    {
+      "package_name": "com.radar.map",
+      "client": {
+        "app_id": "111916585"
+      },
+      "oauth_client": {
+        "client_id": "111916585",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "111916585",
+        "package_name": "com.radar.map"
+      }
+    },
+    {
+      "package_name": "com.leapmotor.map",
+      "client": {
+        "app_id": "111916557"
+      },
+      "oauth_client": {
+        "client_id": "111916557",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "111916557",
+        "package_name": "com.leapmotor.map"
+      }
+    },
+    {
+      "package_name": "com.gwm.map",
+      "client": {
+        "app_id": "111916527"
+      },
+      "oauth_client": {
+        "client_id": "111916527",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "111916527",
+        "package_name": "com.gwm.map"
+      }
+    },
+    {
+      "package_name": "com.huawei.maps.auto.aries",
+      "client": {
+        "app_id": "111578205"
+      },
+      "oauth_client": {
+        "client_id": "111578205",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "111578205",
+        "package_name": "com.huawei.maps.auto.aries"
+      }
+    },
+    {
+      "package_name": "com.avatr.ivi.map",
+      "client": {
+        "app_id": "111105501"
+      },
+      "oauth_client": {
+        "client_id": "111105501",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "111105501",
+        "package_name": "com.avatr.ivi.map"
+      }
+    },
+    {
+      "package_name": "com.huawei.maps.auto.app",
+      "client": {
+        "app_id": "105812875"
+      },
+      "oauth_client": {
+        "client_id": "105812875",
+        "client_type": 27
+      },
+      "app_info": {
+        "app_id": "105812875",
+        "package_name": "com.huawei.maps.auto.app"
+      }
+    }
+  ]
 }
