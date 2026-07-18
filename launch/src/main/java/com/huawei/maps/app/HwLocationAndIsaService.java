@@ -215,26 +215,6 @@ public class HwLocationAndIsaService extends Service {
             LogUtils.getInstance().i("LocationService", "get invalid location");
             return;
         }
-
-        if (Utils.isInChina()) {
-            LogUtils.getInstance().d("LocationService", "Old location: " + GsonUtil.toJson(location));
-            LocationUtils.convertLocationCoordTo02(location);
-        }
-        // 处理新的定位信息
-        PetalSDKManager.getInstance().getPetalEHPService().setEHPLocation(location);
         LogUtils.getInstance().i("LocationService", "New location: " + GsonUtil.toJson(location));
-        if (needCheckOfflinedataUpdate && OfflineDataUtils.getInstance().notTimeException()) {
-            needCheckOfflinedataUpdate = false;
-
-            new Thread(() -> {
-                try {
-                    LogUtils.getInstance().i(TAG, "handleNewLocation start check...");
-                    OfflineDataUtils.getInstance().checkUpdate(this, location.getLatitude(), location.getLongitude());
-                } catch (Exception e) {
-                    LogUtils.getInstance().i(TAG, "checkUpdateOfflinedata error...e = " + Utils.getStackTraceAsString(e));
-                }
-            }).start();
-        }
-        //LogUtils.getInstance().i("mukuitest", "getIsaDataVersion = " + EhpDataBulderUtils.getInstance().getIsaDataVersion());
     }
 }

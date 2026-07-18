@@ -1,0 +1,3 @@
+        <meta-data
+            android:name="SAC_OpenAPI_AppId"
+            android:value="45bab876318a998ae3c402e983ba570c" />

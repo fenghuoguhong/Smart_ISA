@@ -33,36 +33,42 @@
 
     <application
         android:name=".MyApplication"
-        android:icon="@mipmap/ic_launcher"
-        android:label="MapISA"
         android:allowBackup="false"
         android:hardwareAccelerated="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="MapISA"
         android:largeHeap="true"
         android:preserveLegacyExternalStorage="true"
         android:supportsRtl="true"
         android:usesCleartextTraffic="false"
         tools:replace="android:allowBackup,android:usesCleartextTraffic">
+        <meta-data
+            android:name="SAC_OpenAPI_AppId"
+            android:value="45bab876318a998ae3c402e983ba570c" />
 
         <activity
             android:name=".MainActivity"
-            android:theme="@style/Theme.NoDisplay"
             android:exported="true"
-            android:label="MapISA">
+            android:label="MapISA"
+            android:theme="@style/Theme.NoDisplay">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
-<!--        <activity-->
-<!--            android:name=".logcat.LogDisplayActivity"-->
-<!--            android:exported="true">-->
-<!--        </activity>-->
+        <!--        <activity-->
+        <!--            android:name=".logcat.LogDisplayActivity"-->
+        <!--            android:exported="true">-->
+        <!--        </activity>-->
         <service
             android:name=".HwLocationAndIsaService"
             android:exported="true" />
 
-        <receiver android:name=".BootReceiver" android:enabled="true" android:exported="true">
+        <receiver
+            android:name=".BootReceiver"
+            android:enabled="true"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
