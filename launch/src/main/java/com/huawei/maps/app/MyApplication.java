@@ -58,6 +58,8 @@ public class MyApplication extends Application {
 
     public static boolean isEhpSuccess = false;
 
+    private NaviWrapper mNaviWrapper;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -73,6 +75,8 @@ public class MyApplication extends Application {
             LogUtils.getInstance().i(TAG, "init sdk error!!! e = " + Utils.getStackTraceAsString(e));
         }
         DownloadPrefs.initContext(this);
+        mNaviWrapper = new NaviWrapper(this);
+        mNaviWrapper.initNaviAPI();
     }
 
     private PetalActivateObserver activateObserver = new PetalActivateObserver() {
