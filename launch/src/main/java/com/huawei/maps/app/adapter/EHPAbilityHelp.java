@@ -3,7 +3,6 @@ package com.huawei.maps.app.adapter;
 import android.content.Context;
 
 import com.google.gson.Gson;
-import com.huawei.hmsforcar.calyx.log.LogUtil;
 import com.huawei.maps.app.bean.MetaDataMessage;
 import com.huawei.maps.app.bean.PositionMessage;
 import com.huawei.maps.app.bean.ProfileLongMessage;
@@ -12,6 +11,7 @@ import com.huawei.maps.app.bean.SegmentMessage;
 import com.huawei.maps.app.bean.StatusMessage;
 import com.huawei.maps.app.bean.StubMessage;
 import com.huawei.maps.app.contants.MessageTypeContants;
+import com.huawei.maps.app.utils.LogUtils;
 import com.smart.sdk.ehp.v2.HznDataMessage;
 import com.smart.sdk.ehp.v2.HznEdgeMessage;
 import com.smart.sdk.ehp.v2.HznPosnMessage;
@@ -60,27 +60,27 @@ public class EHPAbilityHelp {
     private HznEdgeMessage mHznEdgeMessage;
 
     public EHPAbilityHelp() {
-        LogUtil.logI(TAG, "EHPAbilityHelp");
+        LogUtils.getInstance().i(TAG, "EHPAbilityHelp");
     }
 
     public void initContext(Context context) {
-        LogUtil.logI(TAG, "init");
+        LogUtils.getInstance().i(TAG, "init");
         mEhpAbility = new EHPAbility(context);
         mGson = new Gson();
     }
 
     public void onCalculateEhpSuccess() {
-        LogUtil.logI(TAG, "onCalculateEhpSuccess");
+        LogUtils.getInstance().i(TAG, "onCalculateEhpSuccess");
     }
 
     public void onCalculateEhpFailure(int var1) {
-        LogUtil.logI(TAG, "onCalculateEhpFailure");
+        LogUtils.getInstance().i(TAG, "onCalculateEhpFailure");
     }
 
     public void onEhpInfoUpdate(Map<String, String> ehpInfoMap) {
         Set<String> keySet = ehpInfoMap.keySet();
         for (String key : keySet) {
-            LogUtil.logI(TAG, "doEhpInfoUpdate  key:" + key + "  info:" + ehpInfoMap.get(key).replaceAll("\n", ""));
+            LogUtils.getInstance().i(TAG, "doEhpInfoUpdate  key:" + key + "  info:" + ehpInfoMap.get(key).replaceAll("\n", ""));
             switch (key) {
                 case MessageTypeContants.POSITION:
                     updatePosition(mGson.fromJson(ehpInfoMap.get(key), PositionMessage.class));
@@ -104,15 +104,15 @@ public class EHPAbilityHelp {
                     updateStatus(mGson.fromJson(ehpInfoMap.get(key), StatusMessage.class));
                     break;
                 default:
-                    LogUtil.logI(TAG, "doEhpInfoUpdate unknow key");
+                    LogUtils.getInstance().i(TAG, "doEhpInfoUpdate unknow key");
                     break;
             }
         }
     }
 
     private void updateStatus(StatusMessage statusMessage) {
-        LogUtil.logI(TAG, "onUpdateStatus");
-        LogUtil.logD(TAG, "onUpdateStatus:" + statusMessage.toString());
+        LogUtils.getInstance().i(TAG, "onUpdateStatus");
+        LogUtils.getInstance().d(TAG, "onUpdateStatus:" + statusMessage.toString());
         if (mHznSplyElectcStatus == null) {
             mHznSplyElectcStatus = new HznSplyElectcStatus();
         }
@@ -121,8 +121,8 @@ public class EHPAbilityHelp {
     }
 
     private void updatePosition(PositionMessage positionMessage) {
-        LogUtil.logI(TAG, "onUpdatePosition");
-        LogUtil.logD(TAG, "onUpdatePosition:" + positionMessage.toString());
+        LogUtils.getInstance().i(TAG, "onUpdatePosition");
+        LogUtils.getInstance().d(TAG, "onUpdatePosition:" + positionMessage.toString());
         if (mHznPosnMessage == null) {
             mHznPosnMessage = new HznPosnMessage();
         }
@@ -141,8 +141,8 @@ public class EHPAbilityHelp {
     }
 
     private void updateMetaData(MetaDataMessage metaDataMessage) {
-        LogUtil.logI(TAG, "onUpdateMetaData");
-        LogUtil.logD(TAG, "onUpdateMetaData:" + metaDataMessage.toString());
+        LogUtils.getInstance().i(TAG, "onUpdateMetaData");
+        LogUtils.getInstance().d(TAG, "onUpdateMetaData:" + metaDataMessage.toString());
         if (mHznDataMessage == null) {
             mHznDataMessage = new HznDataMessage();
         }
@@ -163,8 +163,8 @@ public class EHPAbilityHelp {
     }
 
     private void updateSegment(SegmentMessage segmentMessage) {
-        LogUtil.logI(TAG, "onUpdateSegment");
-        LogUtil.logD(TAG, "onUpdateSegment:" + segmentMessage.toString());
+        LogUtils.getInstance().i(TAG, "onUpdateSegment");
+        LogUtils.getInstance().d(TAG, "onUpdateSegment:" + segmentMessage.toString());
         if (mHznSegMessage == null) {
             mHznSegMessage = new HznSegMessage();
         }
@@ -191,8 +191,8 @@ public class EHPAbilityHelp {
     }
 
     private void updateProfileLong(ProfileLongMessage profileLongMessage) {
-        LogUtil.logI(TAG, "onUpdateProfileLong");
-        LogUtil.logD(TAG, "onUpdateProfileLong:" + profileLongMessage.toString());
+        LogUtils.getInstance().i(TAG, "onUpdateProfileLong");
+        LogUtils.getInstance().d(TAG, "onUpdateProfileLong:" + profileLongMessage.toString());
         if (mHznProfLongMessage == null) {
             mHznProfLongMessage = new HznProfLongMessage();
         }
@@ -213,8 +213,8 @@ public class EHPAbilityHelp {
     }
 
     private void updateProfileShort(ProfileShortMessage profileShortMessage) {
-        LogUtil.logI(TAG, "updateProfileShort");
-        LogUtil.logD(TAG, "updateProfileShort:" + profileShortMessage.toString());
+        LogUtils.getInstance().i(TAG, "updateProfileShort");
+        LogUtils.getInstance().d(TAG, "updateProfileShort:" + profileShortMessage.toString());
         if (mHznProfShoMessage == null) {
             mHznProfShoMessage = new HznProfShoMessage();
         }
@@ -238,8 +238,8 @@ public class EHPAbilityHelp {
     }
 
     private void updateStub(StubMessage stubMessage) {
-        LogUtil.logI(TAG, "onUpdateStub");
-        LogUtil.logD(TAG, "onUpdateStub:" + stubMessage.toString());
+        LogUtils.getInstance().i(TAG, "onUpdateStub");
+        LogUtils.getInstance().d(TAG, "onUpdateStub:" + stubMessage.toString());
         if (mHznEdgeMessage == null) {
             mHznEdgeMessage = new HznEdgeMessage();
         }

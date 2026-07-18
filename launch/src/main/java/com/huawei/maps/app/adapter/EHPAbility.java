@@ -2,10 +2,8 @@ package com.huawei.maps.app.adapter;
 
 import android.content.Context;
 
-import com.huawei.hmsforcar.calyx.log.LogUtil;
-
+import com.huawei.maps.app.utils.LogUtils;
 import com.smart.sdk.base.api.ECarXApiClient;
-import com.smart.sdk.base.common.exception.EASFrameworkException;
 import com.smart.sdk.ehp.EHPAPI;
 import com.smart.sdk.ehp.api.IV2Manager;
 import com.smart.sdk.ehp.api.IV2Message;
@@ -25,11 +23,11 @@ public class EHPAbility {
         @Override
         public void onAPIReady(boolean b) {
             if (b) {
-                LogUtil.logI(TAG, "init ehpapi success.");
+                LogUtils.getInstance().i(TAG, "init ehpapi success.");
                 mIv2Manager = mEhpapi.getEHPV2Manager();
                 return;
             }
-            LogUtil.logW(TAG, "init ehpapi failed.");
+            LogUtils.getInstance().i(TAG, "init ehpapi failed.");
         }
     };
 
@@ -38,21 +36,21 @@ public class EHPAbility {
     }
 
     public final void init(Context context) {
-        LogUtil.logI(TAG, "init");
+        LogUtils.getInstance().i(TAG, "init");
         mEhpapi = EHPAPI.get(context);
         mEhpapi.init(context, mInitCallbac);
     }
 
     public void updadteHznMessage(IV2Message iv2Message) {
         if (mIv2Manager == null) {
-            LogUtil.logI(TAG, "mIv2Manager try re init.");
+            LogUtils.getInstance().i(TAG, "mIv2Manager try re init.");
             mIv2Manager = mEhpapi.getEHPV2Manager();
             return;
         }
         try {
             mIv2Manager.updateHznMessage(iv2Message);
         } catch (EASFrameworkException e) {
-            LogUtil.logE(TAG, "updadteHznMessage EASFrameworkException");
+            LogUtils.getInstance().i(TAG, "updadteHznMessage EASFrameworkException");
         }
     }
 }

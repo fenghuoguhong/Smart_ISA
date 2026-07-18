@@ -2,7 +2,7 @@ package com.huawei.maps.app.adapter;
 
 import android.content.Context;
 
-import com.huawei.hmsforcar.calyx.log.LogUtil;
+import com.huawei.maps.app.utils.LogUtils;
 
 import java.util.Map;
 
@@ -102,7 +102,7 @@ public class EHPAbilityManager {
 
     public void onCalculateEhpSuccess() {
         if (!checkInit()) {
-            LogUtil.logI(TAG, "onCalculateEhpSuccess ehpAbilityHelp not init");
+            LogUtils.getInstance().i(TAG, "onCalculateEhpSuccess ehpAbilityHelp not init");
             return;
         }
         mEhpAbilityHelp.onCalculateEhpSuccess();
@@ -110,7 +110,7 @@ public class EHPAbilityManager {
 
     public void onCalculateEhpFailure(int var1) {
         if (!checkInit()) {
-            LogUtil.logI(TAG, "onCalculateEhpFailure ehpAbilityHelp not init");
+            LogUtils.getInstance().i(TAG, "onCalculateEhpFailure ehpAbilityHelp not init");
             return;
         }
         mEhpAbilityHelp.onCalculateEhpFailure(var1);
@@ -118,7 +118,7 @@ public class EHPAbilityManager {
 
     public void onEhpInfoUpdate(Map<String, String> ehpInfoMap) {
         if (!checkInit()) {
-            LogUtil.logI(TAG, "onEhpInfoUpdate ehpAbilityHelp not init");
+            LogUtils.getInstance().i(TAG, "onEhpInfoUpdate ehpAbilityHelp not init");
             return;
         }
         mEhpAbilityHelp.onEhpInfoUpdate(ehpInfoMap);

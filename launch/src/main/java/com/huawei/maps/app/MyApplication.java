@@ -19,6 +19,8 @@ import com.huawei.maps.app.activation.api.enums.ActivationMode;
 import com.huawei.maps.app.activation.api.enums.ApplicationType;
 import com.huawei.maps.app.activation.api.listener.PetalActivateObserver;
 import com.huawei.maps.app.activation.api.model.ActivationInitParam;
+import com.huawei.maps.app.adapter.EHPAbilityManager;
+import com.huawei.maps.app.adapter.SystemAbility;
 import com.huawei.maps.app.common.utils.SharedPreUtil;
 import com.huawei.maps.app.ehp.api.listener.PetalEHPListener;
 import com.huawei.maps.app.ehp.api.model.PetalEHPInitParam;
@@ -39,8 +41,10 @@ import com.huawei.maps.log.AutoLogModuleConfig;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -57,6 +61,7 @@ public class MyApplication extends Application {
     private ScheduledExecutorService checkActiveStatusExecutor;
 
     public static boolean isEhpSuccess = false;
+    private SystemAbility mSystemAbility;
 
     @Override
     public void onCreate() {
@@ -95,12 +100,17 @@ public class MyApplication extends Application {
     private void activateSdk() {
         ActivationInitParam activationInitParam = new ActivationInitParam();
         mActivationService = PetalSDKManager.getInstance().getPetalActivationService();
+        mSystemAbility = new SystemAbility(getApplicationContext());
         if (mActivationService != null) {
             activationInitParam.setActivationMode(ActivationMode.ONLINE_ACTIVATION);
-            activationInitParam.setDeviceId("apptest123456789");
-            activationInitParam.setCountryCode("CN");
-            activationInitParam.setVehicleType("HUAWEI");
-            activationInitParam.setManufacturer("HUAWEI");
+            // CarInfoService.getInfoVin()
+            activationInitParam.setDeviceId(mSystemAbility.getInfoVin());
+            // CarMapService.getCountryCode()
+            activationInitParam.setCountryCode(mSystemAbility.getCountryCode());
+            // CarInfoService.getInfoModel()
+            activationInitParam.setVehicleType(mSystemAbility.getInfoModel());
+            // CarInfoService.getManufacturer()
+            activationInitParam.setManufacturer(mSystemAbility.getManufacturer());
             LogUtils.getInstance().i(TAG, "mVehicleService is null..");
             try {
                 String activePath = getExternalFilesDir(null).getCanonicalPath();
@@ -152,16 +162,21 @@ public class MyApplication extends Application {
             public void onCalculateEhpSuccess() {
                 LogUtils.getInstance().i(TAG, "onCalculateEhpSuccess");
                 isEhpSuccess = true;
+                EHPAbilityManager.getInstance().onCalculateEhpSuccess();
             }
 
             @Override
             public void onCalculateEhpFailure(int i) {
                 LogUtils.getInstance().i(TAG, "onCalculateEhpFailure");
+                EHPAbilityManager.getInstance().onCalculateEhpFailure(i);
             }
 
             @Override
-            public void onEhpInfoUpdate(String s, String s1) {
+            public void onEhpInfoUpdate(String type, String info) {
                 //这里转发ehp信号
+                Map<String, String> ehpInfoMap = new HashMap<>();
+                ehpInfoMap.put(type, info);
+                EHPAbilityManager.getInstance().onEhpInfoUpdate(ehpInfoMap);
             }
 
             @Override
@@ -260,6 +275,7 @@ public class MyApplication extends Application {
         config.setMinProfileLongInterval(50);
         config.setOfflineMode(true);
         PetalSDKManager.getInstance().getPetalEHPService().init(config);
+        EHPAbilityManager.getInstance().init(getApplicationContext());
     }
 
     @Override
