@@ -28,6 +28,8 @@ public class SystemAbility {
 
     private static final String PATH_RULE = "_|\\.";
 
+    public static final int DEVICE_XDSN = 554725992;
+
     private final Context mContext;
 
     private Car mCar;

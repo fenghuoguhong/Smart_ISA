@@ -1,13 +1,11 @@
 package com.huawei.maps.app;
 
 import android.app.Application;
-import android.content.Intent;
 import android.content.res.Configuration;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
 import android.net.NetworkRequest;
-import android.text.TextUtils;
 
 import androidx.annotation.NonNull;
 
@@ -22,6 +20,7 @@ import com.huawei.maps.app.activation.api.model.ActivationInitParam;
 import com.huawei.maps.app.adapter.EHPAbilityManager;
 import com.huawei.maps.app.adapter.SystemAbility;
 import com.huawei.maps.app.common.utils.SharedPreUtil;
+import com.huawei.maps.app.common.utils.task.TaskManager;
 import com.huawei.maps.app.ehp.api.listener.PetalEHPListener;
 import com.huawei.maps.app.ehp.api.model.PetalEHPInitParam;
 import com.huawei.maps.app.guide.api.model.PetalLaneInfo;
@@ -38,11 +37,8 @@ import com.huawei.maps.log.AutoLogConstants;
 import com.huawei.maps.log.AutoLogInitConf;
 import com.huawei.maps.log.AutoLogModuleConfig;
 
-import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.Executors;
@@ -64,6 +60,18 @@ public class MyApplication extends Application {
     private SystemAbility mSystemAbility;
 
     private NaviWrapper mNaviWrapper;
+
+    // 激活 初始化重试次数上限
+    private static final int EHP_RETRY_MAX_TIMES = 3;
+
+    // 激活 初始化首次执行延迟（毫秒）
+    private static final long EHP_INIT_DELAY_MS = 10_000L;
+
+    // 激活 初始化重试间隔（毫秒）
+    private static final long EHP_RETRY_INTERVAL_MS = 30_000L;
+
+    // 激活 初始化当前重试次数
+    private int mEHPRetryCount = 0;
 
     @Override
     public void onCreate() {
@@ -102,20 +110,24 @@ public class MyApplication extends Application {
     };
 
     private void activateSdk() {
+        mSystemAbility = new SystemAbility(getApplicationContext());
+        TaskManager.postDelayed(TaskManager.createTaskRunnable(TAG, "activateSdk", () -> {
+            tryActivateSdk();
+        }), EHP_INIT_DELAY_MS);
+    }
+
+    private void tryActivateSdk() {
         ActivationInitParam activationInitParam = new ActivationInitParam();
         mActivationService = PetalSDKManager.getInstance().getPetalActivationService();
-        mSystemAbility = new SystemAbility(getApplicationContext());
         if (mActivationService != null) {
             activationInitParam.setActivationMode(ActivationMode.ONLINE_ACTIVATION);
-            // CarInfoService.getInfoVin()
             activationInitParam.setDeviceId(mSystemAbility.getInfoVin());
-            // CarMapService.getCountryCode()
             activationInitParam.setCountryCode(mSystemAbility.getCountryCode());
-            // CarInfoService.getInfoModel()
             activationInitParam.setVehicleType(mSystemAbility.getInfoModel());
-            // CarInfoService.getManufacturer()
             activationInitParam.setManufacturer(mSystemAbility.getManufacturer());
-            LogUtils.getInstance().i(TAG, "mVehicleService is null..");
+            LogUtils.getInstance().i(TAG, "mVehicleService is null.. + InfoVin is null:" +
+                    mSystemAbility.getInfoVin() + "  getCountryCode:" + mSystemAbility.getCountryCode() +
+                    "  getInfoModel:" + mSystemAbility.getInfoModel() + "  getManufacturer:" + mSystemAbility.getManufacturer());
             try {
                 String activePath = getExternalFilesDir(null).getCanonicalPath();
                 LogUtils.getInstance().i(TAG, "activePath = " + activePath);
@@ -142,6 +154,8 @@ public class MyApplication extends Application {
             LogUtils.getInstance().i(TAG, "isaversion = " + BuildConfig.VERSION_NAME + " 20260630_A12_3.5");
         }
     }
+
+    ;
 
     public void initMapService() {
         //初始化offlineMapService

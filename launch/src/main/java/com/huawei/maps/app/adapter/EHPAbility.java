@@ -2,6 +2,7 @@ package com.huawei.maps.app.adapter;
 
 import android.content.Context;
 
+import com.smart.sdk.base.common.exception.EASFrameworkException;
 import com.huawei.maps.app.utils.LogUtils;
 import com.smart.sdk.base.api.ECarXApiClient;
 import com.smart.sdk.ehp.EHPAPI;
