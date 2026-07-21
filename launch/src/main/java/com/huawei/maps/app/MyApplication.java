@@ -72,6 +72,7 @@ public class MyApplication extends Application {
 
     // 激活 初始化当前重试次数
     private int mEHPRetryCount = 0;
+    private boolean sdkIsInit = false;
 
     @Override
     public void onCreate() {
@@ -113,6 +114,7 @@ public class MyApplication extends Application {
         mSystemAbility = new SystemAbility(getApplicationContext());
         TaskManager.postDelayed(TaskManager.createTaskRunnable(TAG, "activateSdk", () -> {
             tryActivateSdk();
+            initMapService();
         }), EHP_INIT_DELAY_MS);
     }
 
@@ -151,16 +153,17 @@ public class MyApplication extends Application {
                 LogUtils.getInstance().i(TAG, "mActivationService.activate() = " + mActivationService.activate());
             }
             LogUtils.getInstance().i(TAG, "getActivateStatus() = " + getActivateStatus());
+
             LogUtils.getInstance().i(TAG, "isaversion = " + BuildConfig.VERSION_NAME + " 20260630_A12_3.5");
         }
     }
 
     ;
 
-    public void initMapService() {
+    public synchronized void initMapService() {
         //初始化offlineMapService
         //int type = 0;
-        if (!getActivateStatus()) {
+        if (!getActivateStatus() || sdkIsInit) {
             LogUtils.getInstance().i(TAG, "SDK is not activated successfully, cannot initMapService");
             return;
         }
@@ -226,6 +229,7 @@ public class MyApplication extends Application {
         LogUtils.getInstance().i(TAG, "注册了 isaPetalEHPListener");
         PetalSDKManager.getInstance().getPetalEHPService().setCanAutoStartPureEHP(true);
         PetalSDKManager.getInstance().getPetalEHPService().startPureEHP();
+        sdkIsInit = true;
     }
 
     /**
