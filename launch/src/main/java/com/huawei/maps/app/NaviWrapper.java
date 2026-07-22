@@ -60,7 +60,6 @@ public class NaviWrapper {
         switch (naviBaseModel.getProtocolID()) {
             case NaviProtocolID.NAVI_NTF_DR_POIS_INFO:
                 RspDrPoisInfo rspDrPoisInfo = (RspDrPoisInfo) naviBaseModel;
-                LogUtils.getInstance().i(TAG, "onNaviEvent NAVI_DR_POSCHANGED:" + rspDrPoisInfo);
                 Location converted = convertDrPoisInfoToLocation(rspDrPoisInfo);
                 if (Utils.isInChina()) {
                     LogUtils.getInstance().d("LocationService", "Old location: " + GsonUtil.toJson(converted));
@@ -68,7 +67,7 @@ public class NaviWrapper {
                 }
                 // handle new location
                 PetalSDKManager.getInstance().getPetalEHPService().setEHPLocation(converted);
-                LogUtils.getInstance().i("NaviWrapper", "New location: " + GsonUtil.toJson(converted));
+                LogUtils.getInstance().i(TAG, "New location before =" + rspDrPoisInfo);
                 if (needCheckOfflinedataUpdate && OfflineDataUtils.getInstance().notTimeException()) {
                     needCheckOfflinedataUpdate = false;
                     new Thread(() -> {
@@ -107,7 +106,17 @@ public class NaviWrapper {
             myLocation.setBearingAccuracyDegrees(drPoisInfo.getCourseAcc());
             myLocation.setVerticalAccuracyMeters(drPoisInfo.getDeltaAltAcc());
         }
-        LogUtils.getInstance().i(TAG, "New locacion convertDrPoisInfoToLocation: " + GsonUtil.toJson(drPoisInfo));
+        LogUtils.getInstance().i(TAG, "New locacion convertDrPoisInfoToLocation: lat=" + drPoisInfo.getLatitude()
+                + ", lon=" + drPoisInfo.getLongitude()
+                + ", course=" + drPoisInfo.getCourse()
+                + ", posAcc=" + drPoisInfo.getPosAcc()
+                + ", speed=" + drPoisInfo.getSpeed()
+                + ", time=" + drPoisInfo.getTime()
+                + ", deltaAltValid=" + drPoisInfo.isDeltaAltValid()
+                + ", deltaAlt=" + drPoisInfo.getDeltaAlt()
+                + ", speedAcc=" + drPoisInfo.getSpeedAcc()
+                + ", courseAcc=" + drPoisInfo.getCourseAcc()
+                + ", deltaAltAcc=" + drPoisInfo.getDeltaAltAcc());
         return myLocation;
     }
 }
