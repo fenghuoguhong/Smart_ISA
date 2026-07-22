@@ -51,13 +51,14 @@ public class NaviWrapper {
     };
 
     private final INaviEventListener mINaviEventListener = naviBaseModel -> {
+        LogUtils.getInstance().i(TAG, "naviBaseModel.getProtocolID: " + naviBaseModel.getProtocolID());
         if (naviBaseModel == null) {
             LogUtils.getInstance().i(TAG, "naviBaseModel is null!");
             return;
         }
 
         switch (naviBaseModel.getProtocolID()) {
-            case NaviProtocolID.NAVI_DR_POSCHANGED:
+            case NaviProtocolID.NAVI_NTF_DR_POIS_INFO:
                 RspDrPoisInfo rspDrPoisInfo = (RspDrPoisInfo) naviBaseModel;
                 LogUtils.getInstance().i(TAG, "onNaviEvent NAVI_DR_POSCHANGED:" + rspDrPoisInfo);
                 Location converted = convertDrPoisInfoToLocation(rspDrPoisInfo);
