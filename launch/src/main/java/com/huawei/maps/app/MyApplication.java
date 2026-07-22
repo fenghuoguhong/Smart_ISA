@@ -127,7 +127,7 @@ public class MyApplication extends Application {
             activationInitParam.setCountryCode(mSystemAbility.getCountryCode());
             activationInitParam.setVehicleType(mSystemAbility.getInfoModel());
             activationInitParam.setManufacturer(mSystemAbility.getManufacturer());
-            LogUtils.getInstance().i(TAG, "mVehicleService is null.. + InfoVin is null:" +
+            LogUtils.getInstance().i(TAG, "InfoVin:" +
                     mSystemAbility.getInfoVin() + "  getCountryCode:" + mSystemAbility.getCountryCode() +
                     "  getInfoModel:" + mSystemAbility.getInfoModel() + "  getManufacturer:" + mSystemAbility.getManufacturer());
             try {

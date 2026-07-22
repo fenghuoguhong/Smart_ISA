@@ -4,7 +4,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.Environment;
 import android.util.Log;
 
 import java.io.File;
@@ -27,7 +26,7 @@ import java.util.zip.ZipOutputStream;
 public class LogUtils {
     private static final String TAG = "KikaISA_LogUtils";
     public static String LOG_DIR = ""; // 日志存储在内部存储的 AppLogs 文件夹
-    public static String LOG_DIR_SDK = ""; // 日志存储在内部存储华为的日志
+    public static final String LOG_DIR_SDK = "/data/log"; // 日志存储在内部存储华为的日志
     private static final String LOG_FILE_FORMAT = "yyyy-MM-dd_HH-mm-ss";
     private static final String LOG_FILE_EXT = ".log";
     private static final String COMPRESSED_FILE_EXT = ".zip";
@@ -64,11 +63,9 @@ public class LogUtils {
 
     public void initWriteLogFile(Context context) {
         supportWriteLogFile = true;
-        //supportConsoleOutput = true;
+        supportConsoleOutput = true;
         String packageName = context.getPackageName();
-        LOG_DIR_SDK = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getAbsolutePath() + "/"
-                + packageName;
-        LOG_DIR = LOG_DIR_SDK + "/feedbacklogs/kikalogs";
+        LOG_DIR = LOG_DIR_SDK + "/kikalogs";
         isaOfflinedtaPath = Utils.isAutomotive(context) ? "/nav/navi/" + packageName : LOG_DIR_SDK + "/offlinedata";
         File logDir = new File(LOG_DIR);
         Log.i(TAG, "Log directory path: " + logDir.getAbsolutePath());
@@ -91,9 +88,6 @@ public class LogUtils {
 
     public void init(Context context) {
         supportConsoleOutput = true;
-        String packageName = context.getPackageName();
-        LOG_DIR_SDK = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOCUMENTS).getAbsolutePath() + "/"
-                + packageName;
     }
 
     private void rotateLogs() {

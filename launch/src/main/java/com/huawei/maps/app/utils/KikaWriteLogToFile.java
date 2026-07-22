@@ -45,6 +45,7 @@ public class KikaWriteLogToFile {
 
     // 初始化（需在应用启动时调用）
     public void init(File logFile) {
+        // /storage/emulated/10/Documents/com.smart.car.map.ehp/feedbacklogs/kikalogs
         currentLogFile = logFile;
         try {
             logWriter = new BufferedWriter(new FileWriter(logFile, true));
