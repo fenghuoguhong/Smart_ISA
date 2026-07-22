@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.util.Log;
 
+import com.huawei.maps.app.adapter.SystemAbility;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -66,7 +68,8 @@ public class LogUtils {
         supportConsoleOutput = true;
         String packageName = context.getPackageName();
         LOG_DIR = LOG_DIR_SDK + "/kikalogs";
-        isaOfflinedtaPath = Utils.isAutomotive(context) ? "/nav/navi/" + packageName : LOG_DIR_SDK + "/offlinedata";
+        SystemAbility mSystemAbility = new SystemAbility(context);
+        isaOfflinedtaPath = mSystemAbility.getOfflineDataPath();
         File logDir = new File(LOG_DIR);
         Log.i(TAG, "Log directory path: " + logDir.getAbsolutePath());
         // Create log directory if not exists
