@@ -160,7 +160,7 @@ public class SystemAbility {
         if (!TextUtils.isEmpty(path)) {
             return path;
         }
-        path = "/maps/ehp";
+        path = "/map/ehp";
         LogUtils.getInstance().i(TAG, "getOfflineDataPath:end");
         LogUtils.getInstance().d(TAG, "getOfflineDataPath:" + path);
         return path;
