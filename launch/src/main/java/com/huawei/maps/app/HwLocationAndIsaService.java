@@ -56,6 +56,8 @@ public class HwLocationAndIsaService extends Service {
 
     private long lastResumeTime = 0;
 
+    private static int logCounter = 0;
+
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -215,6 +217,10 @@ public class HwLocationAndIsaService extends Service {
             LogUtils.getInstance().i("LocationService", "get invalid location");
             return;
         }
-        LogUtils.getInstance().i("LocationService", "New location: " + GsonUtil.toJson(location));
+        logCounter = ++logCounter % 10;
+        if (logCounter == 5) {
+            //原始gps信号降频，改为10s打印1次日志
+            LogUtils.getInstance().i("LocationService", "New location: " + GsonUtil.toJson(location));
+        }
     }
 }
