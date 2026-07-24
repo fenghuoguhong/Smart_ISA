@@ -2,6 +2,7 @@ package com.huawei.maps.app.utils;
 
 import android.content.Context;
 import android.os.Build;
+import android.os.Environment;
 import android.os.StatFs;
 
 import java.io.File;
@@ -88,5 +89,22 @@ public class StorageUtils {
             return 0.0;
         }
         return getFreeSpaceMB(path);
+    }
+
+    // 调用示例
+    // double totalGB = getDataPartitionTotalSize() / (1024.0 * 1024.0 * 1024.0);
+    public static long getDataPartitionTotalSize() {
+        File dataDir = Environment.getDataDirectory(); // 路径为 /data
+        StatFs statFs = new StatFs(dataDir.getAbsolutePath());
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            // Android 4.3+ (API 18)
+            return statFs.getTotalBytes();
+        } else {
+            // 兼容远古低版本
+            long blockSize = statFs.getBlockSizeLong();
+            long blockCount = statFs.getBlockCountLong();
+            return blockSize * blockCount;
+        }
     }
 }

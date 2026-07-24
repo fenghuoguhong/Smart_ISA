@@ -28,6 +28,7 @@ import com.huawei.maps.app.guide.api.model.PetalNaviInfo;
 import com.huawei.maps.app.utils.DownloadPrefs;
 import com.huawei.maps.app.utils.LogUtils;
 import com.huawei.maps.app.utils.OfflineDataUtils;
+import com.huawei.maps.app.utils.StorageUtils;
 import com.huawei.maps.app.utils.Utils;
 import com.huawei.maps.auto.petalsdk.InitParam;
 import com.huawei.maps.auto.petalsdk.PetalLaunchModel;
@@ -91,6 +92,8 @@ public class MyApplication extends Application {
         DownloadPrefs.initContext(this);
         mNaviWrapper = new NaviWrapper(this);
         mNaviWrapper.initNaviAPI();
+        double totalGB = StorageUtils.getDataPartitionTotalSize() / (1024.0 * 1024.0 * 1024.0);
+        LogUtils.getInstance().i(TAG, "totalGB = " + totalGB);
     }
 
     private PetalActivateObserver activateObserver = new PetalActivateObserver() {
