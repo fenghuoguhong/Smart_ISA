@@ -85,7 +85,11 @@ public class OfflineDataUtils {
     }
 
     public String getIsaDataVersion() {
-        // 完整替换以加入服务非空保护
+        String version = Utils.getDataVersionFromFile(LogUtils.getInstance().isaOfflinedtaPath + "/offlinemaps/render/manifest/dataVersion.txt");
+        if (version != null) {
+            LogUtils.getInstance().i(TAG, "getIsaDataVersion from dataVersion.txt, version = " + version);
+            return version;
+        }
         final String[] dataVersion = {""};
         final CountDownLatch latch = new CountDownLatch(1);
         final AtomicInteger callbackCount = new AtomicInteger(0);
