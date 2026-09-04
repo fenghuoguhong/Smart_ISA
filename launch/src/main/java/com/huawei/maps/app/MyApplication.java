@@ -291,14 +291,13 @@ public class MyApplication extends Application {
 
     private void initEHP() {
         PetalEHPInitParam config = new PetalEHPInitParam();
-        config.setOfflineMode(true);
         if (mCountryCode != null) {
             config.setCountryCode(mCountryCode);
         }
         config.setMinSegmentInterval(50);
         config.setMinStubInterval(50);
         config.setMinProfileLongInterval(50);
-        config.setOfflineMode(true);
+        config.setOfflineMode(false);
         PetalSDKManager.getInstance().getPetalEHPService().init(config);
         EHPAbilityManager.getInstance().init(getApplicationContext());
     }
