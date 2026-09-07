@@ -94,8 +94,36 @@ public class NaviWrapper {
     };
 
     /**
+     * 从 GPRMC 语句中提取对地速度(节)
+     * gprmc 示例: $GPRMC,024448.29,A,3020.272702,N,12115.645634,E,15.6,350.2876,050926,,,*1E
+     * 按逗号分隔后,速度位于第 8 个字段(索引 7)
+     */
+    private float parseGprmcSpeed(String gprmc) {
+        if (gprmc == null || gprmc.isEmpty()) {
+            return 0f;
+        }
+        // 兼容带 "gprmc=" 前缀或前后有其他内容的输入
+        int start = gprmc.indexOf("$GPRMC");
+        if (start < 0) {
+            return 0f;
+        }
+        String sentence = gprmc.substring(start);
+        String[] fields = sentence.split(",");
+        if (fields.length > 7 && !fields[7].isEmpty()) {
+            try {
+                float speed = Float.parseFloat(fields[7]);
+                LogUtils.getInstance().i(TAG, "parseGprmcSpeed: " + speed);
+                return speed;
+            } catch (NumberFormatException e) {
+                LogUtils.getInstance().i(TAG, "parseGprmcSpeed error...e = " + Utils.getStackTraceAsString(e));
+            }
+        }
+        return 0f;
+    }
+
+    /**
      * convert RspDrPoisInfo to android.location.Location
-     * speed: SDK uses km/h, Location needs m/s
+     * speed: SDK 使用 m/s
      */
     private Location convertDrPoisInfoToLocation(RspDrPoisInfo drPoisInfo) {
         if (drPoisInfo == null) {
@@ -106,7 +134,10 @@ public class NaviWrapper {
         myLocation.setLongitude(drPoisInfo.getLongitude());
         myLocation.setBearing(drPoisInfo.getCourse());
         myLocation.setAccuracy(drPoisInfo.getPosAcc());
-        myLocation.setSpeed(drPoisInfo.getSpeed() / 3.6f);
+        // GPRMC 速度为节(knots),Location 需要 m/s(1 节 ≈ 0.514444 m/s)
+        float gprmcSpeed = parseGprmcSpeed(drPoisInfo.getGprmc());
+        float speed = gprmcSpeed > 0 ? gprmcSpeed * 0.514444f : drPoisInfo.getSpeed();
+        myLocation.setSpeed(speed);
         myLocation.setTime(drPoisInfo.getTime());
         if (drPoisInfo.isDeltaAltValid()) {
             myLocation.setAltitude(drPoisInfo.getDeltaAlt());
@@ -121,6 +152,8 @@ public class NaviWrapper {
                 + ", course=" + drPoisInfo.getCourse()
                 + ", posAcc=" + drPoisInfo.getPosAcc()
                 + ", speed=" + drPoisInfo.getSpeed()
+                + ", gprmcSpeed=" + gprmcSpeed
+                + ", speed=" + speed
                 + ", time=" + drPoisInfo.getTime()
                 + ", deltaAltValid=" + drPoisInfo.isDeltaAltValid()
                 + ", deltaAlt=" + drPoisInfo.getDeltaAlt()
