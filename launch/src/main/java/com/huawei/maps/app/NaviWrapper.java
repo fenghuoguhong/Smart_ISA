@@ -2,6 +2,7 @@ package com.huawei.maps.app;
 
 import android.content.Context;
 import android.location.Location;
+import android.os.SystemClock;
 
 import com.huawei.maps.app.utils.GsonUtil;
 import com.huawei.maps.app.utils.LogUtils;
@@ -23,8 +24,11 @@ public class NaviWrapper {
     private NaviAPI mNaviAPI;
     private Context mContext;
 
+    private static final long DR_POIS_HANDLE_INTERVAL = 1000L;
+
     private Location myLocation = new Location("NaviWrapper");
     private boolean needCheckOfflinedataUpdate = true;
+    private long mLastDrPoisHandleTime = 0L;
 
     public NaviWrapper(Context context) {
         mContext = context;
@@ -59,6 +63,12 @@ public class NaviWrapper {
 
         switch (naviBaseModel.getProtocolID()) {
             case NaviProtocolID.NAVI_NTF_DR_POIS_INFO:
+                // 固定 1s 执行一次:距上次处理不足 1s 的回调直接丢弃
+                long now = SystemClock.elapsedRealtime();
+                if (now - mLastDrPoisHandleTime < DR_POIS_HANDLE_INTERVAL) {
+                    break;
+                }
+                mLastDrPoisHandleTime = now;
                 RspDrPoisInfo rspDrPoisInfo = (RspDrPoisInfo) naviBaseModel;
                 Location converted = convertDrPoisInfoToLocation(rspDrPoisInfo);
                 if (Utils.isInChina()) {
