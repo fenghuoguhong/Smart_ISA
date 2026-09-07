@@ -29,6 +29,8 @@ public class NaviWrapper {
     private Location myLocation = new Location("NaviWrapper");
     private boolean needCheckOfflinedataUpdate = true;
     private long mLastDrPoisHandleTime = 0L;
+    private double mLastSentLatitude = Double.NaN;
+    private double mLastSentLongitude = Double.NaN;
 
     public NaviWrapper(Context context) {
         mContext = context;
@@ -63,13 +65,17 @@ public class NaviWrapper {
 
         switch (naviBaseModel.getProtocolID()) {
             case NaviProtocolID.NAVI_NTF_DR_POIS_INFO:
-                // 固定 1s 执行一次:距上次处理不足 1s 的回调直接丢弃
+                RspDrPoisInfo rspDrPoisInfo = (RspDrPoisInfo) naviBaseModel;
+                boolean coordChanged = (rspDrPoisInfo.getLatitude() != mLastSentLatitude
+                        || rspDrPoisInfo.getLongitude() != mLastSentLongitude);
                 long now = SystemClock.elapsedRealtime();
-                if (now - mLastDrPoisHandleTime < DR_POIS_HANDLE_INTERVAL) {
+                // 经纬度变化:直接发送;经纬度相同:固定 1s 最多发送一次
+                if (!coordChanged && now - mLastDrPoisHandleTime < DR_POIS_HANDLE_INTERVAL) {
                     break;
                 }
                 mLastDrPoisHandleTime = now;
-                RspDrPoisInfo rspDrPoisInfo = (RspDrPoisInfo) naviBaseModel;
+                mLastSentLatitude = rspDrPoisInfo.getLatitude();
+                mLastSentLongitude = rspDrPoisInfo.getLongitude();
                 Location converted = convertDrPoisInfoToLocation(rspDrPoisInfo);
                 if (Utils.isInChina()) {
                     LogUtils.getInstance().d("LocationService", "Old location: " + GsonUtil.toJson(converted));
@@ -109,7 +115,7 @@ public class NaviWrapper {
         }
         String sentence = gprmc.substring(start);
         String[] fields = sentence.split(",");
-        if (fields.length > 7 && !fields[7].isEmpty()) {
+        if (fields != null && !fields[7].isEmpty() && fields.length > 7) {
             try {
                 float speed = Float.parseFloat(fields[7]);
                 LogUtils.getInstance().i(TAG, "parseGprmcSpeed: " + speed);
