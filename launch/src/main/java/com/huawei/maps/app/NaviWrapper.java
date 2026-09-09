@@ -26,7 +26,10 @@ public class NaviWrapper {
 
     private static final long DR_POIS_HANDLE_INTERVAL = 1000L;
 
-    private Location myLocation = new Location("NaviWrapper");
+    // 两个 Location 对象交替使用,避免下游缓存引用同一对象导致对比异常
+    private Location myLocationA = new Location("NaviWrapper");
+    private Location myLocationB = new Location("NaviWrapper");
+    private boolean useLocationA = true;
     private boolean needCheckOfflinedataUpdate = true;
     private long mLastDrPoisHandleTime = 0L;
     private double mLastSentLatitude = Double.NaN;
@@ -77,13 +80,14 @@ public class NaviWrapper {
                 mLastSentLatitude = rspDrPoisInfo.getLatitude();
                 mLastSentLongitude = rspDrPoisInfo.getLongitude();
                 Location converted = convertDrPoisInfoToLocation(rspDrPoisInfo);
+                LogUtils.getInstance().i(TAG, "New location before =" + rspDrPoisInfo);
                 if (Utils.isInChina()) {
-                    LogUtils.getInstance().d("LocationService", "Old location: " + GsonUtil.toJson(converted));
+                    LogUtils.getInstance().d("LocationService", "Old location: " + converted);
                     LocationUtils.convertLocationCoordTo02(converted);
                 }
                 // handle new location
                 PetalSDKManager.getInstance().getPetalEHPService().setEHPLocation(converted);
-                LogUtils.getInstance().i(TAG, "New location before =" + rspDrPoisInfo);
+                LogUtils.getInstance().i(TAG, "New location after =" + converted);
                 if (needCheckOfflinedataUpdate && OfflineDataUtils.getInstance().notTimeException()) {
                     needCheckOfflinedataUpdate = false;
                     new Thread(() -> {
@@ -136,6 +140,9 @@ public class NaviWrapper {
             LogUtils.getInstance().i(TAG, "drPoisInfo is null!");
             return null;
         }
+        // 每次切换使用不同对象: A -> B -> A ...
+        Location myLocation = useLocationA ? myLocationA : myLocationB;
+        useLocationA = !useLocationA;
         myLocation.setLatitude(drPoisInfo.getLatitude());
         myLocation.setLongitude(drPoisInfo.getLongitude());
         myLocation.setBearing(drPoisInfo.getCourse());
