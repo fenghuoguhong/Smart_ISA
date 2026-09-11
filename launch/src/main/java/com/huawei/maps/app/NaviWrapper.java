@@ -2,7 +2,7 @@ package com.huawei.maps.app;
 
 import android.content.Context;
 import android.location.Location;
-import android.os.SystemClock;
+import android.os.Process;
 
 import com.huawei.maps.app.utils.GsonUtil;
 import com.huawei.maps.app.utils.LogUtils;
@@ -17,6 +17,12 @@ import com.smart.sdk.navi.model.base.NaviProtocolID;
 import com.smart.sdk.navi.model.client.NaviEventConfig;
 import com.smart.sdk.navi.model.service.RspDrPoisInfo;
 
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+
 public class NaviWrapper {
 
     public static final String TAG = "NaviWrapper";
@@ -24,19 +30,107 @@ public class NaviWrapper {
     private NaviAPI mNaviAPI;
     private Context mContext;
 
-    private static final long DR_POIS_HANDLE_INTERVAL = 1000L;
+    /** 固定 1s 向 EHP 上报一次位置 */
+    private static final long EHP_LOCATION_SEND_INTERVAL_MS = 1000L;
 
     // 两个 Location 对象交替使用,避免下游缓存引用同一对象导致对比异常
     private Location myLocationA = new Location("NaviWrapper");
     private Location myLocationB = new Location("NaviWrapper");
     private boolean useLocationA = true;
     private boolean needCheckOfflinedataUpdate = true;
-    private long mLastDrPoisHandleTime = 0L;
-    private double mLastSentLatitude = Double.NaN;
-    private double mLastSentLongitude = Double.NaN;
+
+    /**
+     * 全局保存最新一次 NAVI_NTF_DR_POIS_INFO 转换后的位置(独立副本),
+     * 由固定 1s 的调度线程读取并上报给 EHP。
+     */
+    private volatile Location mLatestLocation = null;
+
+    /** 固定 1s 执行一次 setEHPLocation 的调度线程池,线程优先级最高,避免被系统降级或误杀 */
+    private volatile ScheduledExecutorService mEhpLocationScheduler;
+
+    /** 每个线程只需设置一次系统级优先级 */
+    private static final ThreadLocal<AtomicBoolean> sNativePrioritySet =
+            new ThreadLocal<AtomicBoolean>() {
+                @Override
+                protected AtomicBoolean initialValue() {
+                    return new AtomicBoolean(false);
+                }
+            };
 
     public NaviWrapper(Context context) {
         mContext = context;
+        startEhpLocationScheduler();
+    }
+
+    /**
+     * 启动固定 1s 上报 EHP 位置的调度线程池。
+     * 关键点:
+     * 1) 单线程池,减少上下文切换,保证上报节奏稳定;
+     * 2) 非守护线程 + Java 层 Thread.MAX_PRIORITY,避免应用切后台后线程被回收;
+     * 3) 线程内部再调用 Process.setThreadPriority(THREAD_PRIORITY_URGENT_AUDIO),
+     *    将系统 nice 值拉到 -19(Android 允许的最高优先级),降低被系统调度器降级/误杀概率。
+     */
+    private void startEhpLocationScheduler() {
+        ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(
+                1,
+                new ThreadFactory() {
+                    @Override
+                    public Thread newThread(Runnable r) {
+                        Thread thread = new Thread(r, "NaviWrapper-EhpLocation");
+                        // Java 层最高优先级
+                        thread.setPriority(Thread.MAX_PRIORITY);
+                        // 非守护线程,避免 JVM 认为空闲时被回收
+                        thread.setDaemon(false);
+                        thread.setUncaughtExceptionHandler((t, e) -> LogUtils.getInstance().i(TAG,
+                                "EhpLocation thread uncaught e = " + Utils.getStackTraceAsString(e)));
+                        return thread;
+                    }
+                });
+        // 取消任务时立即从队列移除,防止残留堆积
+        executor.setRemoveOnCancelPolicy(true);
+        executor.setContinueExistingPeriodicTasksAfterShutdownPolicy(false);
+        executor.setExecuteExistingDelayedTasksAfterShutdownPolicy(false);
+        mEhpLocationScheduler = executor;
+
+        executor.scheduleWithFixedDelay(this::reportEhpLocation,
+                0,
+                EHP_LOCATION_SEND_INTERVAL_MS,
+                TimeUnit.MILLISECONDS);
+        LogUtils.getInstance().i(TAG, "EhpLocation scheduler started, interval = "
+                + EHP_LOCATION_SEND_INTERVAL_MS + "ms");
+    }
+
+    /** 定时任务体:每 1s 读取一次全局最新位置并下发给 EHP */
+    private void reportEhpLocation() {
+        try {
+            // 提升当前线程系统级优先级到 Android 允许的最高档 (nice = -19)
+            if (sNativePrioritySet.get().compareAndSet(false, true)) {
+                Process.setThreadPriority(Process.THREAD_PRIORITY_URGENT_AUDIO);
+                LogUtils.getInstance().i(TAG, "EhpLocation thread native priority raised to URGENT_AUDIO");
+            }
+
+            Location latest = mLatestLocation;
+            if (latest == null) {
+                return;
+            }
+            PetalSDKManager.getInstance().getPetalEHPService().setEHPLocation(latest);
+            LogUtils.getInstance().i(TAG, "Scheduled setEHPLocation = " + latest);
+        } catch (Throwable e) {
+            // 兜底捕获,防止异常导致调度任务被 ScheduledExecutorService 静默取消
+            LogUtils.getInstance().i(TAG, "Scheduled setEHPLocation error...e = "
+                    + Utils.getStackTraceAsString(e));
+        }
+    }
+
+    /** 释放调度线程池,避免服务销毁后线程泄漏 */
+    public void release() {
+        ScheduledExecutorService scheduler = mEhpLocationScheduler;
+        mEhpLocationScheduler = null;
+        if (scheduler != null && !scheduler.isShutdown()) {
+            scheduler.shutdownNow();
+            LogUtils.getInstance().i(TAG, "EhpLocation scheduler shutdown");
+        }
+        mLatestLocation = null;
     }
 
     public void initNaviAPI() {
@@ -60,40 +154,35 @@ public class NaviWrapper {
     };
 
     private final INaviEventListener mINaviEventListener = naviBaseModel -> {
-        LogUtils.getInstance().i(TAG, "naviBaseModel.getProtocolID: " + naviBaseModel.getProtocolID());
         if (naviBaseModel == null) {
             LogUtils.getInstance().i(TAG, "naviBaseModel is null!");
             return;
         }
+        LogUtils.getInstance().i(TAG, "naviBaseModel.getProtocolID: " + naviBaseModel.getProtocolID());
 
         switch (naviBaseModel.getProtocolID()) {
             case NaviProtocolID.NAVI_NTF_DR_POIS_INFO:
                 RspDrPoisInfo rspDrPoisInfo = (RspDrPoisInfo) naviBaseModel;
-                boolean coordChanged = (rspDrPoisInfo.getLatitude() != mLastSentLatitude
-                        || rspDrPoisInfo.getLongitude() != mLastSentLongitude);
-                long now = SystemClock.elapsedRealtime();
-                // 经纬度变化:直接发送;经纬度相同:固定 1s 最多发送一次
-                if (!coordChanged && now - mLastDrPoisHandleTime < DR_POIS_HANDLE_INTERVAL) {
+                LogUtils.getInstance().i(TAG, "New location before =" + rspDrPoisInfo);
+                Location converted = convertDrPoisInfoToLocation(rspDrPoisInfo);
+                if (converted == null) {
                     break;
                 }
-                mLastDrPoisHandleTime = now;
-                mLastSentLatitude = rspDrPoisInfo.getLatitude();
-                mLastSentLongitude = rspDrPoisInfo.getLongitude();
-                Location converted = convertDrPoisInfoToLocation(rspDrPoisInfo);
-                LogUtils.getInstance().i(TAG, "New location before =" + rspDrPoisInfo);
                 if (Utils.isInChina()) {
                     LogUtils.getInstance().d("LocationService", "Old location: " + converted);
                     LocationUtils.convertLocationCoordTo02(converted);
                 }
-                // handle new location
-                PetalSDKManager.getInstance().getPetalEHPService().setEHPLocation(converted);
-                LogUtils.getInstance().i(TAG, "New location after =" + converted);
+                // 每次事件都把最新位置写入全局变量,由固定 1s 的调度线程负责下发
+                mLatestLocation = converted;
+                LogUtils.getInstance().i(TAG, "New location after =" + mLatestLocation);
                 if (needCheckOfflinedataUpdate && OfflineDataUtils.getInstance().notTimeException()) {
                     needCheckOfflinedataUpdate = false;
+                    final Location locForCheck = mLatestLocation;
                     new Thread(() -> {
                         try {
                             LogUtils.getInstance().i(TAG, "handleNewLocation start check...");
-                            OfflineDataUtils.getInstance().checkUpdate(mContext, converted.getLatitude(), converted.getLongitude());
+                            OfflineDataUtils.getInstance().checkUpdate(mContext,
+                                    locForCheck.getLatitude(), locForCheck.getLongitude());
                         } catch (Exception e) {
                             LogUtils.getInstance().i(TAG, "checkUpdateOfflinedata error...e = " + Utils.getStackTraceAsString(e));
                         }
@@ -119,7 +208,7 @@ public class NaviWrapper {
         }
         String sentence = gprmc.substring(start);
         String[] fields = sentence.split(",");
-        if (fields != null && !fields[7].isEmpty() && fields.length > 7) {
+        if (fields != null && fields.length > 7 && !fields[7].isEmpty()) {
             try {
                 float speed = Float.parseFloat(fields[7]);
                 LogUtils.getInstance().i(TAG, "parseGprmcSpeed: " + speed);

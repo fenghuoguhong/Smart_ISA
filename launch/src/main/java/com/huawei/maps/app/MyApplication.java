@@ -290,15 +290,17 @@ public class MyApplication extends Application {
     }
 
     private void initEHP() {
-        PetalEHPInitParam config = new PetalEHPInitParam();
+        PetalEHPInitParam ehpConfig = new PetalEHPInitParam();
         if (mCountryCode != null) {
-            config.setCountryCode(mCountryCode);
+            ehpConfig.setCountryCode(mCountryCode);
         }
-        config.setMinSegmentInterval(50);
-        config.setMinStubInterval(50);
-        config.setMinProfileLongInterval(50);
-        config.setOfflineMode(false);
-        PetalSDKManager.getInstance().getPetalEHPService().init(config);
+        ehpConfig.setSegmentLength(300);
+        ehpConfig.setMinSegmentInterval(70);
+        ehpConfig.setMinStubInterval(70);
+        ehpConfig.setMinProfileLongInterval(70);
+        ehpConfig.setEhpType(2);
+        ehpConfig.setOfflineMode(false);
+        PetalSDKManager.getInstance().getPetalEHPService().init(ehpConfig);
         EHPAbilityManager.getInstance().init(getApplicationContext());
     }
 
