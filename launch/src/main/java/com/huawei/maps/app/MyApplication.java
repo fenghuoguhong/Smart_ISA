@@ -80,7 +80,8 @@ public class MyApplication extends Application {
         super.onCreate();
         try {
             LogUtils.getInstance().initWriteLogFile(this);
-            mCountryCode = getCountryCode();
+            mSystemAbility = new SystemAbility(getApplicationContext());
+            mCountryCode = mSystemAbility.getCountryCode();
             initPetalSDK();
             activateSdk();
             monitorNetwork();
@@ -114,7 +115,6 @@ public class MyApplication extends Application {
     };
 
     private void activateSdk() {
-        mSystemAbility = new SystemAbility(getApplicationContext());
         TaskManager.postDelayed(TaskManager.createTaskRunnable(TAG, "activateSdk", () -> {
             tryActivateSdk();
             initMapService();
@@ -127,7 +127,7 @@ public class MyApplication extends Application {
         if (mActivationService != null) {
             activationInitParam.setActivationMode(ActivationMode.ONLINE_ACTIVATION);
             activationInitParam.setDeviceId(mSystemAbility.getInfoVin());
-            activationInitParam.setCountryCode(mSystemAbility.getCountryCode());
+            activationInitParam.setCountryCode(mCountryCode);
             activationInitParam.setVehicleType(mSystemAbility.getInfoModel());
             activationInitParam.setManufacturer(mSystemAbility.getManufacturer());
             LogUtils.getInstance().i(TAG, "InfoVin:" +
@@ -260,12 +260,8 @@ public class MyApplication extends Application {
         }
         //正式版本
         initParam.setOfflineDataPath(LogUtils.getInstance().isaOfflinedtaPath);
-        if (Utils.isInChina()) {
-            initParam.setGroupMask(AutoLogConstants.GroupMask.GROUP_MASK_ALL);
-            initParam.setLogLevel(AutoLogConstants.GroupMask.GROUP_MASK_ALL);
-        } else {
-            initParam.setGroupMask(AutoLogConstants.GroupMask.GROUP_MASK_HMI_AE);
-        }
+        initParam.setGroupMask(AutoLogConstants.GroupMask.GROUP_MASK_ALL);
+        initParam.setLogLevel(AutoLogConstants.GroupMask.GROUP_MASK_ALL);
         PetalSDKManager.getInstance().init(this, initParam);
         LogUtils.getInstance().i(TAG, "isa offlinemaps path = " + LogUtils.getInstance().isaOfflinedtaPath);
         //LogConfig logConfig = new LogConfig().setLevel(L.ASSERT).setLogPath(LogUtils.LOG_DIR_SDK);

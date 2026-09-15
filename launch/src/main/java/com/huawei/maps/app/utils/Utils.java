@@ -15,7 +15,10 @@ import java.nio.charset.StandardCharsets;
 public class Utils {
     private static String TAG = "kika_utils";
 
-    public static String getStackTraceAsString(Exception e) {
+    public static String getStackTraceAsString(Throwable e) {
+        if (e == null) {
+            return "";
+        }
         // 使用StringWriter和PrintWriter来捕获堆栈跟踪信息
         StringWriter stringWriter = new StringWriter();
         PrintWriter printWriter = new PrintWriter(stringWriter);

@@ -30,25 +30,22 @@ public class NaviWrapper {
     private NaviAPI mNaviAPI;
     private Context mContext;
 
-    /** 固定 1s 向 EHP 上报一次位置 */
+    /**
+     * 固定 1s 向 EHP 上报一次位置
+     */
     private static final long EHP_LOCATION_SEND_INTERVAL_MS = 1000L;
-
-    // 两个 Location 对象交替使用,避免下游缓存引用同一对象导致对比异常
-    private Location myLocationA = new Location("NaviWrapper");
-    private Location myLocationB = new Location("NaviWrapper");
-    private boolean useLocationA = true;
     private boolean needCheckOfflinedataUpdate = true;
 
     /**
-     * 全局保存最新一次 NAVI_NTF_DR_POIS_INFO 转换后的位置(独立副本),
-     * 由固定 1s 的调度线程读取并上报给 EHP。
+     * 固定 1s 执行一次 setEHPLocation 的调度线程池,线程优先级最高,避免被系统降级或误杀
      */
-    private volatile Location mLatestLocation = null;
-
-    /** 固定 1s 执行一次 setEHPLocation 的调度线程池,线程优先级最高,避免被系统降级或误杀 */
     private volatile ScheduledExecutorService mEhpLocationScheduler;
 
-    /** 每个线程只需设置一次系统级优先级 */
+    RspDrPoisInfo rspDrPoisInfo;
+
+    /**
+     * 每个线程只需设置一次系统级优先级
+     */
     private static final ThreadLocal<AtomicBoolean> sNativePrioritySet =
             new ThreadLocal<AtomicBoolean>() {
                 @Override
@@ -68,7 +65,7 @@ public class NaviWrapper {
      * 1) 单线程池,减少上下文切换,保证上报节奏稳定;
      * 2) 非守护线程 + Java 层 Thread.MAX_PRIORITY,避免应用切后台后线程被回收;
      * 3) 线程内部再调用 Process.setThreadPriority(THREAD_PRIORITY_URGENT_AUDIO),
-     *    将系统 nice 值拉到 -19(Android 允许的最高优先级),降低被系统调度器降级/误杀概率。
+     * 将系统 nice 值拉到 -19(Android 允许的最高优先级),降低被系统调度器降级/误杀概率。
      */
     private void startEhpLocationScheduler() {
         ScheduledThreadPoolExecutor executor = new ScheduledThreadPoolExecutor(
@@ -100,7 +97,9 @@ public class NaviWrapper {
                 + EHP_LOCATION_SEND_INTERVAL_MS + "ms");
     }
 
-    /** 定时任务体:每 1s 读取一次全局最新位置并下发给 EHP */
+    /**
+     * 定时任务体:每 1s 读取一次全局最新位置并下发给 EHP
+     */
     private void reportEhpLocation() {
         try {
             // 提升当前线程系统级优先级到 Android 允许的最高档 (nice = -19)
@@ -109,12 +108,36 @@ public class NaviWrapper {
                 LogUtils.getInstance().i(TAG, "EhpLocation thread native priority raised to URGENT_AUDIO");
             }
 
-            Location latest = mLatestLocation;
-            if (latest == null) {
+            if (rspDrPoisInfo == null) {
+                LogUtils.getInstance().i(TAG, "rspDrPoisInfo is null");
                 return;
             }
-            PetalSDKManager.getInstance().getPetalEHPService().setEHPLocation(latest);
-            LogUtils.getInstance().i(TAG, "Scheduled setEHPLocation = " + latest);
+
+            Location converted = convertDrPoisInfoToLocation(rspDrPoisInfo);
+            if (converted == null) {
+                LogUtils.getInstance().i(TAG, "convertDrPoisInfoToLocation failed");
+                return;
+            }
+            if (Utils.isInChina()) {
+                LogUtils.getInstance().d("LocationService", "Old location: " + converted);
+                LocationUtils.convertLocationCoordTo02(converted);
+            }
+
+            PetalSDKManager.getInstance().getPetalEHPService().setEHPLocation(converted);
+            LogUtils.getInstance().i(TAG, "New location after =" + converted);
+            if (needCheckOfflinedataUpdate && OfflineDataUtils.getInstance().notTimeException()) {
+                needCheckOfflinedataUpdate = false;
+                final Location locForCheck = converted;
+                new Thread(() -> {
+                    try {
+                        LogUtils.getInstance().i(TAG, "handleNewLocation start check...");
+                        OfflineDataUtils.getInstance().checkUpdate(mContext,
+                                locForCheck.getLatitude(), locForCheck.getLongitude());
+                    } catch (Exception e) {
+                        LogUtils.getInstance().i(TAG, "checkUpdateOfflinedata error...e = " + Utils.getStackTraceAsString(e));
+                    }
+                }).start();
+            }
         } catch (Throwable e) {
             // 兜底捕获,防止异常导致调度任务被 ScheduledExecutorService 静默取消
             LogUtils.getInstance().i(TAG, "Scheduled setEHPLocation error...e = "
@@ -122,7 +145,9 @@ public class NaviWrapper {
         }
     }
 
-    /** 释放调度线程池,避免服务销毁后线程泄漏 */
+    /**
+     * 释放调度线程池,避免服务销毁后线程泄漏
+     */
     public void release() {
         ScheduledExecutorService scheduler = mEhpLocationScheduler;
         mEhpLocationScheduler = null;
@@ -130,7 +155,7 @@ public class NaviWrapper {
             scheduler.shutdownNow();
             LogUtils.getInstance().i(TAG, "EhpLocation scheduler shutdown");
         }
-        mLatestLocation = null;
+        rspDrPoisInfo = null;
     }
 
     public void initNaviAPI() {
@@ -162,32 +187,8 @@ public class NaviWrapper {
 
         switch (naviBaseModel.getProtocolID()) {
             case NaviProtocolID.NAVI_NTF_DR_POIS_INFO:
-                RspDrPoisInfo rspDrPoisInfo = (RspDrPoisInfo) naviBaseModel;
+                rspDrPoisInfo = (RspDrPoisInfo) naviBaseModel;
                 LogUtils.getInstance().i(TAG, "New location before =" + rspDrPoisInfo);
-                Location converted = convertDrPoisInfoToLocation(rspDrPoisInfo);
-                if (converted == null) {
-                    break;
-                }
-                if (Utils.isInChina()) {
-                    LogUtils.getInstance().d("LocationService", "Old location: " + converted);
-                    LocationUtils.convertLocationCoordTo02(converted);
-                }
-                // 每次事件都把最新位置写入全局变量,由固定 1s 的调度线程负责下发
-                mLatestLocation = converted;
-                LogUtils.getInstance().i(TAG, "New location after =" + mLatestLocation);
-                if (needCheckOfflinedataUpdate && OfflineDataUtils.getInstance().notTimeException()) {
-                    needCheckOfflinedataUpdate = false;
-                    final Location locForCheck = mLatestLocation;
-                    new Thread(() -> {
-                        try {
-                            LogUtils.getInstance().i(TAG, "handleNewLocation start check...");
-                            OfflineDataUtils.getInstance().checkUpdate(mContext,
-                                    locForCheck.getLatitude(), locForCheck.getLongitude());
-                        } catch (Exception e) {
-                            LogUtils.getInstance().i(TAG, "checkUpdateOfflinedata error...e = " + Utils.getStackTraceAsString(e));
-                        }
-                    }).start();
-                }
                 break;
         }
     };
@@ -229,9 +230,8 @@ public class NaviWrapper {
             LogUtils.getInstance().i(TAG, "drPoisInfo is null!");
             return null;
         }
-        // 每次切换使用不同对象: A -> B -> A ...
-        Location myLocation = useLocationA ? myLocationA : myLocationB;
-        useLocationA = !useLocationA;
+        // 每次切换使用不同对象
+        Location myLocation = new Location("NaviWrapper");
         myLocation.setLatitude(drPoisInfo.getLatitude());
         myLocation.setLongitude(drPoisInfo.getLongitude());
         myLocation.setBearing(drPoisInfo.getCourse());

@@ -120,6 +120,7 @@ public class SystemAbility {
     }
 
     private String getCountryCodeFromPath(String path) {
+        LogUtils.getInstance().i(TAG, "getCountryCode:path=" + path);
         File file = new File(path);
         if (file.listFiles() == null) {
             LogUtils.getInstance().i(TAG, "file.listFiles() is null return DE");
