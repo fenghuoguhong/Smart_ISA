@@ -22,9 +22,9 @@ public class SystemAbility {
 
     public static final String TAG = "SmartHySystemAbilityImpl";
 
-    private static final String OFFLINE_BMANIFEST = "/render/Bmanifest";
+    private static final String OFFLINE_BMANIFEST = "/offlinemaps/render/Bmanifest";
 
-    private static final String OFFLINE_MANIFEST = "/render/manifest";
+    private static final String OFFLINE_MANIFEST = "/offlinemaps/render/manifest";
 
     private static final String PATH_RULE = "_|\\.";
 
@@ -113,15 +113,17 @@ public class SystemAbility {
         if (!TextUtils.isEmpty(countryCode)) {
             return countryCode;
         }
-        countryCode = getCountryCodeFromPath(getOfflineManifestPath());
-        LogUtils.getInstance().i(TAG, "getCountryCode:" + countryCode);
+        String offlineManifestPath = getOfflineManifestPath();
+        countryCode = getCountryCodeFromPath(offlineManifestPath);
+        LogUtils.getInstance().i(TAG, "offlineManifestPath:" + offlineManifestPath + "  getCountryCode:" + countryCode);
         return countryCode;
     }
 
     private String getCountryCodeFromPath(String path) {
         File file = new File(path);
         if (file.listFiles() == null) {
-            return "";
+            LogUtils.getInstance().i(TAG, "file.listFiles() is null return DE");
+            return "DE";
         }
         try {
             for (File listFile : file.listFiles()) {
@@ -139,8 +141,8 @@ public class SystemAbility {
         } catch (Exception e) {
             LogUtils.getInstance().i(TAG, "getCountryCode:e= " + e.getMessage());
         }
-        LogUtils.getInstance().i(TAG, "getCountryCode: empty");
-        return "";
+        LogUtils.getInstance().i(TAG, "getCountryCode: empty  return DE");
+        return "DE";
     }
 
     // 压缩包方案走Bmanifest,非压缩包方案是manifest
