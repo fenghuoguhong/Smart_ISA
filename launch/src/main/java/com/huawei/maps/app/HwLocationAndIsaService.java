@@ -50,6 +50,16 @@ public class HwLocationAndIsaService extends Service {
     private LocationListener locationListener;
     private static final String TAG = "KikaISA_HwLocationAndIsaService";
 
+    /**
+     * 服务运行标记,供 BootReceiver 判断服务是否已启动,避免重复拉起前台服务。
+     * 进程被杀后静态变量随进程重置,服务重启时 onCreate 会重新置位。
+     */
+    private static volatile boolean sIsServiceRunning = false;
+
+    public static boolean isServiceRunning() {
+        return sIsServiceRunning;
+    }
+
     private boolean needCheckOfflinedataUpdate = true;
 
     private List<OfflineMapsInfo> downloadRecords = new ArrayList<>();
@@ -60,6 +70,7 @@ public class HwLocationAndIsaService extends Service {
 
     @Override
     public void onDestroy() {
+        sIsServiceRunning = false;
         super.onDestroy();
         // 添加定位监听移除
         if (locationManager != null && locationListener != null) {
@@ -75,6 +86,7 @@ public class HwLocationAndIsaService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
+        sIsServiceRunning = true;
         LogUtils.getInstance().i(TAG, "我起来了·");
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         locationListener = location -> {
